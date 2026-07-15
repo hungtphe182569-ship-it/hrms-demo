@@ -54,4 +54,11 @@ public class Account {
     public boolean hasRoleId(long roleId) {
         return roles.stream().anyMatch(role -> role.getId() == roleId);
     }
+
+    public static boolean isTransitionAllowed(String currentStatus, String targetStatus) {
+        return ("ACTIVE".equals(currentStatus)
+                && ("INACTIVE".equals(targetStatus) || "LOCKED".equals(targetStatus)))
+                || (("INACTIVE".equals(currentStatus) || "LOCKED".equals(currentStatus))
+                && "ACTIVE".equals(targetStatus));
+    }
 }

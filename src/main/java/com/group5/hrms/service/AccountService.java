@@ -64,11 +64,9 @@ public class AccountService {
         if (accountId == adminId && !"ACTIVE".equals(targetStatus)) {
             throw new IllegalArgumentException("Bạn không thể khóa hoặc vô hiệu hóa tài khoản đang đăng nhập");
         }
-        boolean allowed = ("ACTIVE".equals(currentStatus)
-                && ("INACTIVE".equals(targetStatus) || "LOCKED".equals(targetStatus)))
-                || (("INACTIVE".equals(currentStatus) || "LOCKED".equals(currentStatus))
-                && "ACTIVE".equals(targetStatus));
-        if (!allowed) throw new IllegalArgumentException("Chuyển trạng thái không hợp lệ");
+        if (!Account.isTransitionAllowed(currentStatus, targetStatus)) {
+            throw new IllegalArgumentException("Chuyển trạng thái không hợp lệ");
+        }
         accountDao.changeStatus(accountId, currentStatus, targetStatus, adminId);
     }
 

@@ -6,6 +6,13 @@ Demo chỉ gồm 3 chức năng Admin:
 2. Manage Roles: xem, tạo, cập nhật và xóa role chưa được sử dụng.
 3. View Reports & Statistics: thống kê tài khoản theo trạng thái và role.
 
+Phiên bản hiện tại bám theo UC17-UC19 trong tài liệu thiết kế:
+
+- UC17: tạo, xem, cập nhật, gán nhiều role, chuyển trạng thái, reset password và soft delete có audit/thu hồi session.
+- UC18: thống kê account, attendance, permission và xuất Excel/PDF.
+- UC19: tạo, cập nhật, xóa role chưa được sử dụng; role được gán trong Account Management.
+- Admin Center được bảo vệ bằng role và permission RBAC.
+
 ## Yêu cầu
 
 - JDK 17
@@ -32,6 +39,20 @@ HRMS_DB_PASSWORD=YourStrong!Passw0rd
 Nếu không đặt biến môi trường, ứng dụng dùng các giá trị mẫu trên.
 
 ## Build và chạy
+
+Cách nhanh trên Windows (tự build, deploy và mở trình duyệt):
+
+```powershell
+.\run.ps1
+```
+
+Dừng Tomcat cục bộ:
+
+```powershell
+.\run.ps1 stop
+```
+
+Khi khởi động, migration `sql/04-admin-upgrade.sql` được chạy idempotent để nâng cấp database cũ mà không xóa dữ liệu.
 
 Trên Windows có thể dùng Maven Wrapper đi kèm, không cần cài Maven thủ công:
 
