@@ -21,14 +21,15 @@ public class AuthenticationFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
         String path = request.getRequestURI().substring(request.getContextPath().length());
-        boolean publicPath = path.equals("/login") || path.startsWith("/assets/") || path.equals("/favicon.ico");
+        boolean publicPath = path.isEmpty() || path.equals("/") || path.equals("/login")
+                || path.startsWith("/assets/") || path.equals("/favicon.ico");
         boolean authenticated = request.getSession(false) != null
                 && request.getSession(false).getAttribute("currentUser") != null;
         if (!publicPath && !authenticated) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
-        if (!publicPath) {
+        if (!publicPath && isAdminArea(path)) {
             Account account = (Account) request.getSession(false).getAttribute("currentUser");
             if (!account.hasRole("Admin")) {
                 response.sendError(HttpServletResponse.SC_FORBIDDEN,
@@ -49,6 +50,10 @@ public class AuthenticationFilter implements Filter {
             }
         }
         chain.doFilter(req, res);
+    }
+
+    private boolean isAdminArea(String path) {
+        return path.startsWith("/accounts") || path.startsWith("/roles") || path.startsWith("/reports");
     }
 
     private String requiredPermission(HttpServletRequest request, String path) {

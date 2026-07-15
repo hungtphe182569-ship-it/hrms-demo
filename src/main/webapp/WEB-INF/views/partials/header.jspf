@@ -3,15 +3,23 @@
 <!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${pageTitle} | PeopleFlow HRMS</title><link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/app.css"></head><body>
 <div class="app-shell"><aside class="sidebar">
-    <a class="brand" href="${pageContext.request.contextPath}/home"><span class="brand-mark">P</span><span><strong>PeopleFlow</strong><small>Human Resources Suite</small></span></a>
-    <nav class="nav-list" aria-label="Điều hướng quản trị">
-        <a class="nav-item ${activePage == 'home' ? 'active' : ''}" href="${pageContext.request.contextPath}/home"><span class="nav-icon">00</span><span><strong>Tổng quan</strong><small>Trang chủ quản trị</small></span></a>
-        <a class="nav-item ${activePage == 'accounts' ? 'active' : ''}" href="${pageContext.request.contextPath}/accounts"><span class="nav-icon">01</span><span><strong>Tài khoản</strong><small>Nhân sự & truy cập</small></span></a>
-        <a class="nav-item ${activePage == 'roles' ? 'active' : ''}" href="${pageContext.request.contextPath}/roles"><span class="nav-icon">02</span><span><strong>Vai trò</strong><small>Phân quyền hệ thống</small></span></a>
-        <a class="nav-item ${activePage == 'reports' ? 'active' : ''}" href="${pageContext.request.contextPath}/reports"><span class="nav-icon">03</span><span><strong>Báo cáo</strong><small>Thống kê tổng quan</small></span></a>
+    <a class="brand" href="${pageContext.request.contextPath}/"><span class="brand-mark">P</span><span><strong>PeopleFlow</strong><small>Human Resources Suite</small></span></a>
+    <nav class="nav-list" aria-label="Điều hướng theo vai trò">
+        <a class="nav-item ${activePage == 'home' ? 'active' : ''}" href="${pageContext.request.contextPath}/home"><span class="nav-icon">00</span><span><strong>Tổng quan</strong><small>Dashboard của bạn</small></span></a>
+        <c:if test="${sessionScope.currentUser.hasRole('Admin')}">
+            <a class="nav-item ${activePage == 'accounts' ? 'active' : ''}" href="${pageContext.request.contextPath}/accounts"><span class="nav-icon">17</span><span><strong>Tài khoản</strong><small>Nhân sự & truy cập</small></span></a>
+            <a class="nav-item ${activePage == 'roles' ? 'active' : ''}" href="${pageContext.request.contextPath}/roles"><span class="nav-icon">19</span><span><strong>Vai trò</strong><small>Phân quyền hệ thống</small></span></a>
+            <a class="nav-item ${activePage == 'reports' ? 'active' : ''}" href="${pageContext.request.contextPath}/reports"><span class="nav-icon">18</span><span><strong>Báo cáo</strong><small>Thống kê & xuất file</small></span></a>
+        </c:if>
+        <c:if test="${sessionScope.currentUser.hasRole('Manager') && !sessionScope.currentUser.hasRole('Admin')}">
+            <span class="nav-section-label">MANAGER TOOLS</span><span class="nav-item disabled"><span class="nav-icon">TM</span><span><strong>Team</strong><small>Sắp triển khai</small></span></span><span class="nav-item disabled"><span class="nav-icon">AP</span><span><strong>Approvals</strong><small>Sắp triển khai</small></span></span>
+        </c:if>
+        <c:if test="${sessionScope.currentUser.hasRole('Employee') && !sessionScope.currentUser.hasRole('Admin') && !sessionScope.currentUser.hasRole('Manager')}">
+            <span class="nav-section-label">MY WORKSPACE</span><span class="nav-item disabled"><span class="nav-icon">AT</span><span><strong>Attendance</strong><small>Sắp triển khai</small></span></span><span class="nav-item disabled"><span class="nav-icon">LV</span><span><strong>Leave</strong><small>Sắp triển khai</small></span></span>
+        </c:if>
     </nav>
-    <div class="sidebar-note"><span class="live-dot"></span><div><strong>Hệ thống hoạt động</strong><small>SQL Server đã kết nối</small></div></div>
-</aside><main class="main-content"><header class="topbar"><div><p class="eyebrow">PEOPLEFLOW / ADMIN CENTER</p><h1>${pageTitle}</h1></div>
-    <div class="user-menu"><div class="admin-chip"><span class="avatar">${sessionScope.currentUser.fullName.substring(0,1)}</span><span><strong><c:out value="${sessionScope.currentUser.fullName}"/></strong><small><c:out value="${sessionScope.currentUser.roleNames}"/></small></span></div><form method="post" action="${pageContext.request.contextPath}/logout"><button class="logout-button" type="submit" title="Đăng xuất">Đăng xuất</button></form></div>
+    <div class="sidebar-note"><span class="live-dot"></span><div><strong>Hệ thống hoạt động</strong><small>Role: <c:out value="${sessionScope.currentUser.roleNames}"/></small></div></div>
+</aside><main class="main-content"><header class="topbar"><div><p class="eyebrow">PEOPLEFLOW / <c:out value="${sessionScope.currentUser.roleNames}"/> WORKSPACE</p><h1>${pageTitle}</h1></div>
+    <div class="user-menu"><div class="admin-chip"><span class="avatar">${sessionScope.currentUser.fullName.substring(0,1)}</span><span><strong><c:out value="${sessionScope.currentUser.fullName}"/></strong><small><c:out value="${sessionScope.currentUser.roleNames}"/></small></span></div><form method="post" action="${pageContext.request.contextPath}/logout"><button class="logout-button" type="submit">Đăng xuất</button></form></div>
 </header>
 <c:if test="${not empty sessionScope.flashMessage}"><div class="flash ${sessionScope.flashType}" role="alert"><span>${sessionScope.flashType == 'success' ? '✓' : '!'}</span><c:out value="${sessionScope.flashMessage}"/></div><c:remove var="flashMessage" scope="session"/><c:remove var="flashType" scope="session"/></c:if>
