@@ -65,6 +65,33 @@ if ($serverConfig -match '<Server port="-1"') {
         Set-Content $serverXml -Encoding UTF8
 }
 
+# A normal `run.ps1` is also a safe restart. This avoids launching a second
+# Tomcat while an older project instance still owns port 8080.
+$existingListener = Get-NetTCPConnection -LocalPort 8080 -State Listen -ErrorAction SilentlyContinue
+if ($existingListener) {
+    Write-Host "Stopping previous Tomcat instance..." -ForegroundColor Yellow
+    & (Join-Path $tomcatHome "bin\catalina.bat") stop 2>$null
+    for ($attempt = 0; $attempt -lt 15; $attempt++) {
+        Start-Sleep -Seconds 1
+        if (-not (Get-NetTCPConnection -LocalPort 8080 -State Listen -ErrorAction SilentlyContinue)) {
+            break
+        }
+    }
+    if (Get-NetTCPConnection -LocalPort 8080 -State Listen -ErrorAction SilentlyContinue) {
+        throw "Port 8080 dang bi mot tien trinh khac su dung. Hay dong tien trinh do roi chay lai."
+    }
+}
+
+$explodedApp = Join-Path $baseDir "webapps\hrms-admin-demo"
+if (Test-Path $explodedApp) {
+    $resolvedApp = (Resolve-Path $explodedApp).Path
+    $resolvedWebapps = (Resolve-Path (Join-Path $baseDir "webapps")).Path
+    if (-not $resolvedApp.StartsWith($resolvedWebapps + [IO.Path]::DirectorySeparatorChar)) {
+        throw "Duong dan deploy khong an toan: $resolvedApp"
+    }
+    Remove-Item -LiteralPath $resolvedApp -Recurse -Force
+}
+
 Copy-Item (Join-Path $projectDir "target\hrms-admin-demo.war") `
     (Join-Path $baseDir "webapps\hrms-admin-demo.war") -Force
 
@@ -75,9 +102,10 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 $url = "http://localhost:8080/hrms-admin-demo/"
-for ($attempt = 0; $attempt -lt 20; $attempt++) {
+$healthUrl = "http://localhost:8080/hrms-admin-demo/login"
+for ($attempt = 0; $attempt -lt 30; $attempt++) {
     try {
-        Invoke-WebRequest $url -UseBasicParsing -TimeoutSec 2 | Out-Null
+        Invoke-WebRequest $healthUrl -UseBasicParsing -TimeoutSec 2 | Out-Null
         Write-Host "App is running: $url" -ForegroundColor Green
         Start-Process $url
         exit 0
