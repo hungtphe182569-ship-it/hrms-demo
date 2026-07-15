@@ -66,7 +66,10 @@
             <resource>
                 <directory>sql</directory>
                 <targetPath>db</targetPath>
-                <includes><include>04-admin-upgrade.sql</include></includes>
+                <includes>
+                    <include>04-admin-upgrade.sql</include>
+                    <include>05-hrm-manager.sql</include>
+                </includes>
             </resource>
         </resources>
         <plugins>

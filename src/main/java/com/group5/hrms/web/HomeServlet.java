@@ -31,6 +31,8 @@ public class HomeServlet extends HttpServlet {
                 request.setAttribute("stats", reportService.loadDashboardStats());
                 request.setAttribute("recentActivities", auditService.recentAdminActivities(6));
                 request.getRequestDispatcher("/WEB-INF/views/home.jsp").forward(request, response);
+            } else if (account.hasRole("HR Manager")) {
+                response.sendRedirect(request.getContextPath() + "/hrm/dashboard");
             } else if (account.hasRole("Manager")) {
                 request.setAttribute("dashboardRole", "Manager");
                 request.getRequestDispatcher("/WEB-INF/views/role-home.jsp").forward(request, response);

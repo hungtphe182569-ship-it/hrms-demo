@@ -49,11 +49,35 @@ public class AuthenticationFilter implements Filter {
                 }
             }
         }
+        if (!publicPath && isHrmArea(path)) {
+            Account account = (Account) request.getSession(false).getAttribute("currentUser");
+            if (!account.hasRole("HR Manager")) {
+                response.sendError(HttpServletResponse.SC_FORBIDDEN,
+                        "Chỉ HR Manager mới có quyền truy cập HRM portal");
+                return;
+            }
+            String permission = requiredHrmPermission(path);
+            if (permission != null) {
+                try {
+                    if (!permissionDao.hasPermission(account.getId(), permission)) {
+                        response.sendError(HttpServletResponse.SC_FORBIDDEN,
+                                "Thiếu permission " + permission + ". Hãy chạy sql/05-hrm-manager.sql.");
+                        return;
+                    }
+                } catch (Exception e) {
+                    throw new ServletException("Cannot verify HRM permission", e);
+                }
+            }
+        }
         chain.doFilter(req, res);
     }
 
     private boolean isAdminArea(String path) {
         return path.startsWith("/accounts") || path.startsWith("/roles") || path.startsWith("/reports");
+    }
+
+    private boolean isHrmArea(String path) {
+        return path.equals("/hrm") || path.startsWith("/hrm/");
     }
 
     private String requiredPermission(HttpServletRequest request, String path) {
@@ -63,5 +87,16 @@ public class AuthenticationFilter implements Filter {
             return request.getParameter("format") == null ? "VIEW_REPORT" : "EXPORT_REPORT";
         }
         return null;
+    }
+
+    private String requiredHrmPermission(String path) {
+        if (path.startsWith("/hrm/analytics")) return "VIEW_HR_ANALYTICS";
+        if (path.startsWith("/hrm/activities")) return "VIEW_ACTIVITY_CENTER";
+        if (path.startsWith("/hrm/leaves")) return "APPROVE_LEAVE";
+        if (path.startsWith("/hrm/payroll")) return "MANAGE_PAYROLL";
+        if (path.startsWith("/hrm/departments")) return "MANAGE_DEPARTMENT";
+        if (path.startsWith("/hrm/calendar")) return "MANAGE_CALENDAR";
+        if (path.equals("/hrm") || path.startsWith("/hrm/dashboard")) return "VIEW_HR_DASHBOARD";
+        return "VIEW_HR_DASHBOARD";
     }
 }

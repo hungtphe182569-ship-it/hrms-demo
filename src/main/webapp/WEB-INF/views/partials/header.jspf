@@ -11,10 +11,20 @@
             <a class="nav-item ${activePage == 'roles' ? 'active' : ''}" href="${pageContext.request.contextPath}/roles"><span class="nav-icon">19</span><span><strong>Vai trò</strong><small>Phân quyền hệ thống</small></span></a>
             <a class="nav-item ${activePage == 'reports' ? 'active' : ''}" href="${pageContext.request.contextPath}/reports"><span class="nav-icon">18</span><span><strong>Báo cáo</strong><small>Thống kê & xuất file</small></span></a>
         </c:if>
-        <c:if test="${sessionScope.currentUser.hasRole('Manager') && !sessionScope.currentUser.hasRole('Admin')}">
+        <c:if test="${sessionScope.currentUser.hasRole('HR Manager')}">
+            <span class="nav-section-label">HR MANAGER</span>
+            <a class="nav-item ${activePage == 'hrm-dashboard' ? 'active' : ''}" href="${pageContext.request.contextPath}/hrm/dashboard"><span class="nav-icon">12</span><span><strong>Dashboard</strong><small>KPI & overview</small></span></a>
+            <a class="nav-item ${activePage == 'hrm-analytics' ? 'active' : ''}" href="${pageContext.request.contextPath}/hrm/analytics"><span class="nav-icon">A</span><span><strong>Analytics</strong><small>HR metrics</small></span></a>
+            <a class="nav-item ${activePage == 'hrm-activities' ? 'active' : ''}" href="${pageContext.request.contextPath}/hrm/activities"><span class="nav-icon">AC</span><span><strong>Activity</strong><small>System logs</small></span></a>
+            <a class="nav-item ${activePage == 'hrm-leaves' ? 'active' : ''}" href="${pageContext.request.contextPath}/hrm/leaves"><span class="nav-icon">13</span><span><strong>Leave</strong><small>Approve / reject</small></span></a>
+            <a class="nav-item ${activePage == 'hrm-payroll' ? 'active' : ''}" href="${pageContext.request.contextPath}/hrm/payroll"><span class="nav-icon">14</span><span><strong>Payroll</strong><small>Final approval</small></span></a>
+            <a class="nav-item ${activePage == 'hrm-departments' ? 'active' : ''}" href="${pageContext.request.contextPath}/hrm/departments"><span class="nav-icon">15</span><span><strong>Departments</strong><small>CRUD rooms</small></span></a>
+            <a class="nav-item ${activePage == 'hrm-calendar' ? 'active' : ''}" href="${pageContext.request.contextPath}/hrm/calendar"><span class="nav-icon">16</span><span><strong>Calendar</strong><small>Company events</small></span></a>
+        </c:if>
+        <c:if test="${sessionScope.currentUser.hasRole('Manager') && !sessionScope.currentUser.hasRole('Admin') && !sessionScope.currentUser.hasRole('HR Manager')}">
             <span class="nav-section-label">MANAGER TOOLS</span><span class="nav-item disabled"><span class="nav-icon">TM</span><span><strong>Team</strong><small>Sắp triển khai</small></span></span><span class="nav-item disabled"><span class="nav-icon">AP</span><span><strong>Approvals</strong><small>Sắp triển khai</small></span></span>
         </c:if>
-        <c:if test="${sessionScope.currentUser.hasRole('Employee') && !sessionScope.currentUser.hasRole('Admin') && !sessionScope.currentUser.hasRole('Manager')}">
+        <c:if test="${sessionScope.currentUser.hasRole('Employee') && !sessionScope.currentUser.hasRole('Admin') && !sessionScope.currentUser.hasRole('Manager') && !sessionScope.currentUser.hasRole('HR Manager')}">
             <span class="nav-section-label">MY WORKSPACE</span><span class="nav-item disabled"><span class="nav-icon">AT</span><span><strong>Attendance</strong><small>Sắp triển khai</small></span></span><span class="nav-item disabled"><span class="nav-icon">LV</span><span><strong>Leave</strong><small>Sắp triển khai</small></span></span>
         </c:if>
     </nav>

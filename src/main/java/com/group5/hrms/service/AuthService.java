@@ -14,6 +14,6 @@ public class AuthService {
         if (username == null || password == null || username.isBlank() || password.isBlank()) {
             return Optional.empty();
         }
-        return accountDao.authenticate(username.trim(), PasswordUtil.hash(password));
+        return accountDao.authenticate(username.trim(), PasswordUtil.hash(password.trim()));
     }
 }

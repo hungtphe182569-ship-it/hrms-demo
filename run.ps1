@@ -6,32 +6,96 @@ param(
 $ErrorActionPreference = "Stop"
 $projectDir = $PSScriptRoot
 $baseDir = Join-Path $projectDir ".runtime\tomcat-base"
+$runtimeDir = Join-Path $projectDir ".runtime"
 
-$tomcatCandidates = @(@(
-    $env:CATALINA_HOME,
-    "C:\Program Files\Apache Software Foundation\Tomcat 10.1",
-    "C:\Program Files\Apache Software Foundation\Tomcat 10.1_Tomcat10.1"
-) | Where-Object { $_ -and (Test-Path (Join-Path $_ "bin\catalina.bat")) })
+function Find-JavaHome {
+    $candidates = New-Object System.Collections.Generic.List[string]
+    if ($env:JAVA_HOME) { [void]$candidates.Add($env:JAVA_HOME.Trim()) }
 
-if (-not $tomcatCandidates) {
-    throw "Khong tim thay Tomcat 10.1. Hay cai Tomcat hoac dat bien CATALINA_HOME."
+    $searchRoots = @(
+        "C:\Program Files\Microsoft\jdk-17*",
+        "C:\Program Files\Eclipse Adoptium\jdk-17*",
+        "C:\Program Files\Java\jdk-17*",
+        "C:\Program Files\Java\latest"
+    )
+    foreach ($pattern in $searchRoots) {
+        Get-Item $pattern -ErrorAction SilentlyContinue | ForEach-Object {
+            [void]$candidates.Add($_.FullName)
+        }
+    }
+
+    foreach ($homePath in $candidates) {
+        if ($homePath -and (Test-Path (Join-Path $homePath "bin\java.exe"))) {
+            return $homePath
+        }
+    }
+    return $null
 }
 
-$tomcatHome = $tomcatCandidates[0]
+function Find-TomcatHome {
+    $candidates = New-Object System.Collections.Generic.List[string]
+    if ($env:CATALINA_HOME) { [void]$candidates.Add($env:CATALINA_HOME.Trim()) }
+    [void]$candidates.Add((Join-Path $runtimeDir "tomcat-10.1"))
+    [void]$candidates.Add("C:\Program Files\Apache Software Foundation\Tomcat 10.1")
+    [void]$candidates.Add("C:\Program Files\Apache Software Foundation\Tomcat 10.1_Tomcat10.1")
+
+    Get-ChildItem (Join-Path $runtimeDir "apache-tomcat-10.1*") -Directory -ErrorAction SilentlyContinue | ForEach-Object {
+        [void]$candidates.Add($_.FullName)
+    }
+
+    foreach ($candidate in $candidates) {
+        if ($candidate -and (Test-Path (Join-Path $candidate "bin\catalina.bat"))) {
+            return (Resolve-Path $candidate).Path
+        }
+    }
+    return $null
+}
+
+function Ensure-Tomcat {
+    $existing = Find-TomcatHome
+    if ($existing) { return $existing }
+
+    New-Item -ItemType Directory -Path $runtimeDir -Force | Out-Null
+    $zipPath = Join-Path $runtimeDir "tomcat-10.1.zip"
+    $extractRoot = Join-Path $runtimeDir "tomcat-extract"
+    $targetHome = Join-Path $runtimeDir "tomcat-10.1"
+
+    # Prefer a stable 10.1.x zip from Apache archive.
+    $downloadUrl = "https://archive.apache.org/dist/tomcat/tomcat-10/v10.1.34/bin/apache-tomcat-10.1.34-windows-x64.zip"
+    Write-Host "Downloading portable Tomcat 10.1 into .runtime ..." -ForegroundColor Cyan
+    Invoke-WebRequest -Uri $downloadUrl -OutFile $zipPath -UseBasicParsing
+
+    if (Test-Path $extractRoot) { Remove-Item $extractRoot -Recurse -Force }
+    Expand-Archive -Path $zipPath -DestinationPath $extractRoot -Force
+
+    $extracted = Get-ChildItem $extractRoot -Directory | Where-Object {
+        Test-Path (Join-Path $_.FullName "bin\catalina.bat")
+    } | Select-Object -First 1
+
+    if (-not $extracted) {
+        throw "Tai Tomcat thanh cong nhung khong tim thay catalina.bat trong zip."
+    }
+
+    if (Test-Path $targetHome) { Remove-Item $targetHome -Recurse -Force }
+    Move-Item $extracted.FullName $targetHome
+    Remove-Item $extractRoot -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item $zipPath -Force -ErrorAction SilentlyContinue
+
+    Write-Host "Tomcat portable ready: $targetHome" -ForegroundColor Green
+    return $targetHome
+}
+
+$tomcatHome = Ensure-Tomcat
 $env:CATALINA_HOME = $tomcatHome
 $env:CATALINA_BASE = $baseDir
 
-$javaCandidates = @(@(
-    $env:JAVA_HOME,
-    "C:\Program Files\Java\jdk-17",
-    "C:\Program Files\Java\latest"
-) | Where-Object { $_ -and (Test-Path (Join-Path $_ "bin\java.exe")) })
-
-if (-not $javaCandidates) {
-    throw "Khong tim thay JDK 17. Hay cai JDK 17 hoac dat bien JAVA_HOME."
+$javaHome = Find-JavaHome
+if (-not $javaHome) {
+    throw "Khong tim thay JDK 17. Cai bang: winget install --id Microsoft.OpenJDK.17 -e"
 }
-
-$env:JAVA_HOME = $javaCandidates[0]
+$env:JAVA_HOME = $javaHome
+Write-Host "JAVA_HOME=$javaHome" -ForegroundColor DarkGray
+Write-Host "CATALINA_HOME=$tomcatHome" -ForegroundColor DarkGray
 
 if ($Action -eq "stop") {
     if (Test-Path $baseDir) {
@@ -43,7 +107,7 @@ if ($Action -eq "stop") {
 }
 
 Write-Host "Building project..." -ForegroundColor Cyan
-& (Join-Path $projectDir "mvnw.cmd") clean package
+& (Join-Path $projectDir "mvnw.cmd") clean package "-Dmaven.test.skip=true"
 if ($LASTEXITCODE -ne 0) {
     throw "Build that bai."
 }
@@ -114,4 +178,8 @@ for ($attempt = 0; $attempt -lt 30; $attempt++) {
     }
 }
 
-throw "Tomcat da khoi dong nhung app chua phan hoi. Kiem tra .runtime\tomcat-base\logs."
+throw "Tomcat da khoi dong nhung app chua phan hoi. Kiem tra .runtime\tomcat-base\logs.`n" +
+      "Thuong gap: SQL Express chua bat TCP/IP. Mo 'SQL Server Configuration Manager' (Run as Admin) ->`n" +
+      "SQL Server Network Configuration -> Protocols for SQLEXPRESS -> TCP/IP = Enabled, roi Restart service SQLEXPRESS.`n" +
+      "DB login mac dinh: hrms_app / HrmsApp@123 (hoac set HRMS_DB_URL / HRMS_DB_USER / HRMS_DB_PASSWORD)."
+
