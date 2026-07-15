@@ -13,8 +13,41 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class AccountDao {
+    public Optional<Account> authenticate(String username, String passwordHash) throws SQLException {
+        String sql = """
+                SELECT u.user_id, u.username, u.email, u.full_name, u.phone, u.status,
+                       u.created_at, u.deleted_at, u.delete_reason,
+                       r.role_id, r.role_name, r.description
+                FROM dbo.users u
+                LEFT JOIN dbo.user_roles ur ON ur.user_id = u.user_id
+                LEFT JOIN dbo.roles r ON r.role_id = ur.role_id
+                WHERE LOWER(u.username) = LOWER(?) AND u.password_hash = ? AND u.status = 'ACTIVE'
+                """;
+        Account account = null;
+        try (Connection connection = Database.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, username);
+            statement.setString(2, passwordHash);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    if (account == null) account = mapAccount(rs);
+                    long roleId = rs.getLong("role_id");
+                    if (!rs.wasNull()) {
+                        Role role = new Role();
+                        role.setId(roleId);
+                        role.setName(rs.getString("role_name"));
+                        role.setDescription(rs.getString("description"));
+                        account.getRoles().add(role);
+                    }
+                }
+            }
+        }
+        return Optional.ofNullable(account);
+    }
+
     public List<Account> findAll(boolean includeDeleted) throws SQLException {
         String sql = """
                 SELECT u.user_id, u.username, u.email, u.full_name, u.phone, u.status,

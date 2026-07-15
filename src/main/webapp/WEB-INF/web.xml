@@ -13,7 +13,7 @@
         <mime-type>application/javascript</mime-type>
     </mime-mapping>
     <welcome-file-list>
-        <welcome-file>accounts</welcome-file>
+        <welcome-file>home</welcome-file>
     </welcome-file-list>
     <session-config>
         <session-timeout>30</session-timeout>
