@@ -1,0 +1,59 @@
+<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${pageTitle} | PeopleFlow HRMS</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/app.css">
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar">
+        <a class="brand" href="${pageContext.request.contextPath}/accounts">
+            <span class="brand-mark">P</span>
+            <span><strong>PeopleFlow</strong><small>Human Resources Suite</small></span>
+        </a>
+
+        <nav class="nav-list" aria-label="Admin navigation">
+            <a class="nav-item ${activePage == 'accounts' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/accounts">
+                <span class="nav-icon">01</span><span><strong>Tài khoản</strong><small>Nhân sự & truy cập</small></span>
+            </a>
+            <a class="nav-item ${activePage == 'roles' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/roles">
+                <span class="nav-icon">02</span><span><strong>Vai trò</strong><small>Phân quyền hệ thống</small></span>
+            </a>
+            <a class="nav-item ${activePage == 'reports' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/reports">
+                <span class="nav-icon">03</span><span><strong>Báo cáo</strong><small>Thống kê tổng quan</small></span>
+            </a>
+        </nav>
+
+        <div class="sidebar-note">
+            <span class="live-dot"></span>
+            <div><strong>Hệ thống hoạt động</strong><small>SQL Server đã kết nối</small></div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="topbar">
+            <div>
+                <p class="eyebrow">PEOPLEFLOW / ADMIN CENTER</p>
+                <h1>${pageTitle}</h1>
+            </div>
+            <div class="admin-chip">
+                <span class="avatar">AD</span>
+                <span><strong>Quản trị viên</strong><small>System Administrator</small></span>
+            </div>
+        </header>
+
+        <c:if test="${not empty sessionScope.flashMessage}">
+            <div class="flash ${sessionScope.flashType}" role="alert">
+                <span>${sessionScope.flashType == 'success' ? '✓' : '!'}</span>
+                <c:out value="${sessionScope.flashMessage}"/>
+            </div>
+            <c:remove var="flashMessage" scope="session"/>
+            <c:remove var="flashType" scope="session"/>
+        </c:if>
