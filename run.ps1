@@ -7,11 +7,11 @@ $ErrorActionPreference = "Stop"
 $projectDir = $PSScriptRoot
 $baseDir = Join-Path $projectDir ".runtime\tomcat-base"
 
-$tomcatCandidates = @(
+$tomcatCandidates = @(@(
     $env:CATALINA_HOME,
     "C:\Program Files\Apache Software Foundation\Tomcat 10.1",
     "C:\Program Files\Apache Software Foundation\Tomcat 10.1_Tomcat10.1"
-) | Where-Object { $_ -and (Test-Path (Join-Path $_ "bin\catalina.bat")) }
+) | Where-Object { $_ -and (Test-Path (Join-Path $_ "bin\catalina.bat")) })
 
 if (-not $tomcatCandidates) {
     throw "Khong tim thay Tomcat 10.1. Hay cai Tomcat hoac dat bien CATALINA_HOME."
@@ -21,10 +21,17 @@ $tomcatHome = $tomcatCandidates[0]
 $env:CATALINA_HOME = $tomcatHome
 $env:CATALINA_BASE = $baseDir
 
-if (-not $env:JAVA_HOME) {
-    $java = Get-Command java -ErrorAction Stop
-    $env:JAVA_HOME = Split-Path (Split-Path $java.Source)
+$javaCandidates = @(@(
+    $env:JAVA_HOME,
+    "C:\Program Files\Java\jdk-17",
+    "C:\Program Files\Java\latest"
+) | Where-Object { $_ -and (Test-Path (Join-Path $_ "bin\java.exe")) })
+
+if (-not $javaCandidates) {
+    throw "Khong tim thay JDK 17. Hay cai JDK 17 hoac dat bien JAVA_HOME."
 }
+
+$env:JAVA_HOME = $javaCandidates[0]
 
 if ($Action -eq "stop") {
     if (Test-Path $baseDir) {
