@@ -24,3 +24,33 @@ JOIN dbo.roles r ON
     (u.username = N'manager01' AND r.role_name = N'Manager') OR
     (u.username IN (N'employee01', N'employee02') AND r.role_name = N'Employee');
 GO
+
+INSERT INTO dbo.permissions(permission_code, description)
+VALUES
+    ('MANAGE_ACCOUNT', N'Tạo, xem, cập nhật, xóa và reset tài khoản'),
+    ('MANAGE_ROLE', N'Tạo, gán, cập nhật và xóa vai trò'),
+    ('VIEW_REPORT', N'Xem báo cáo và thống kê'),
+    ('EXPORT_REPORT', N'Xuất báo cáo Excel/PDF');
+GO
+
+INSERT INTO dbo.role_permissions(role_id, permission_id)
+SELECT r.role_id, p.permission_id
+FROM dbo.roles r CROSS JOIN dbo.permissions p
+WHERE r.role_name = N'Admin';
+GO
+
+INSERT INTO dbo.attendance(user_id, attendance_date, check_in, check_out, status)
+SELECT u.user_id, CAST(DATEADD(DAY, -v.day_offset, GETDATE()) AS DATE),
+       CASE WHEN v.status = 'ABSENT' THEN NULL ELSE CAST(v.check_in AS TIME) END,
+       CASE WHEN v.status IN ('ABSENT','LEAVE') THEN NULL ELSE CAST('17:30' AS TIME) END,
+       v.status
+FROM dbo.users u
+CROSS APPLY (VALUES
+    (0, '08:00', 'PRESENT'),
+    (1, '08:20', 'LATE'),
+    (2, '08:05', 'PRESENT'),
+    (3, '00:00', 'ABSENT'),
+    (4, '00:00', 'LEAVE')
+) v(day_offset, check_in, status)
+WHERE u.status <> 'DELETED';
+GO

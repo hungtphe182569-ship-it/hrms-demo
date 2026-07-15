@@ -1,5 +1,6 @@
 package com.group5.hrms.web;
 
+import com.group5.hrms.model.Account;
 import com.group5.hrms.service.AccountService;
 import com.group5.hrms.service.RoleService;
 import jakarta.servlet.ServletException;
@@ -9,10 +10,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 @WebServlet("/accounts")
 public class AccountServlet extends HttpServlet {
-    private static final long DEMO_ADMIN_ID = 1L;
     private final AccountService accountService = new AccountService();
     private final RoleService roleService = new RoleService();
 
@@ -34,33 +35,48 @@ public class AccountServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String action = request.getParameter("action");
+        Account admin = (Account) request.getSession().getAttribute("currentUser");
         try {
             if ("create".equals(action)) {
-                long roleId = Long.parseLong(request.getParameter("roleId"));
-                accountService.create(
-                        request.getParameter("username"), request.getParameter("email"),
+                accountService.create(request.getParameter("username"), request.getParameter("email"),
                         request.getParameter("fullName"), request.getParameter("phone"),
-                        request.getParameter("password"), roleId);
+                        request.getParameter("password"), roleIds(request));
                 Flash.success(request, "Tạo tài khoản thành công");
+            } else if ("update".equals(action)) {
+                accountService.update(id(request), request.getParameter("email"),
+                        request.getParameter("fullName"), request.getParameter("phone"),
+                        roleIds(request), admin.getId());
+                Flash.success(request, "Cập nhật tài khoản thành công");
+            } else if ("status".equals(action)) {
+                long accountId = id(request);
+                String target = request.getParameter("targetStatus");
+                accountService.changeStatus(accountId, request.getParameter("currentStatus"), target, admin.getId());
+                if (!"ACTIVE".equals(target)) SessionRegistry.revokeAll(accountId);
+                Flash.success(request, "Cập nhật trạng thái thành công");
             } else if ("delete".equals(action)) {
-                long accountId = Long.parseLong(request.getParameter("accountId"));
-                accountService.softDelete(accountId, DEMO_ADMIN_ID, request.getParameter("reason"));
+                long accountId = id(request);
+                accountService.softDelete(accountId, admin.getId(), request.getParameter("reason"));
+                SessionRegistry.revokeAll(accountId);
                 Flash.success(request, "Soft delete tài khoản thành công");
             } else if ("resetPassword".equals(action)) {
-                long accountId = Long.parseLong(request.getParameter("accountId"));
-                String password = accountService.resetPassword(accountId, DEMO_ADMIN_ID);
+                String password = accountService.resetPassword(id(request), admin.getId());
                 Flash.success(request, "Reset password thành công. Password tạm: " + password);
             } else {
                 throw new IllegalArgumentException("Action không hợp lệ");
             }
         } catch (Exception e) {
-            Flash.error(request, userMessage(e));
+            Flash.error(request, e.getMessage() == null ? "Không thể xử lý yêu cầu" : e.getMessage());
         }
         response.sendRedirect(request.getContextPath() + "/accounts");
     }
 
-    private String userMessage(Exception e) {
-        String message = e.getMessage();
-        return message == null || message.isBlank() ? "Không thể xử lý yêu cầu" : message;
+    private long id(HttpServletRequest request) {
+        return Long.parseLong(request.getParameter("accountId"));
+    }
+
+    private long[] roleIds(HttpServletRequest request) {
+        String[] values = request.getParameterValues("roleIds");
+        if (values == null) return new long[0];
+        return Arrays.stream(values).mapToLong(Long::parseLong).distinct().toArray();
     }
 }

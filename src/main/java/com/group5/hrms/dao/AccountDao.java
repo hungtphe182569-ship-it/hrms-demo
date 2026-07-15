@@ -19,7 +19,7 @@ public class AccountDao {
     public Optional<Account> authenticate(String username, String passwordHash) throws SQLException {
         String sql = """
                 SELECT u.user_id, u.username, u.email, u.full_name, u.phone, u.status,
-                       u.created_at, u.deleted_at, u.delete_reason,
+                       u.created_at, u.updated_at, u.deleted_at, u.deleted_by, u.delete_reason,
                        r.role_id, r.role_name, r.description
                 FROM dbo.users u
                 LEFT JOIN dbo.user_roles ur ON ur.user_id = u.user_id
@@ -51,7 +51,7 @@ public class AccountDao {
     public List<Account> findAll(boolean includeDeleted) throws SQLException {
         String sql = """
                 SELECT u.user_id, u.username, u.email, u.full_name, u.phone, u.status,
-                       u.created_at, u.deleted_at, u.delete_reason,
+                       u.created_at, u.updated_at, u.deleted_at, u.deleted_by, u.delete_reason,
                        r.role_id, r.role_name, r.description
                 FROM dbo.users u
                 LEFT JOIN dbo.user_roles ur ON ur.user_id = u.user_id
@@ -89,7 +89,17 @@ public class AccountDao {
         return exists("SELECT 1 FROM dbo.users WHERE email = ?", email);
     }
 
-    public long create(Account account, String passwordHash, long roleId) throws SQLException {
+    public boolean existsEmailForOtherAccount(String email, long accountId) throws SQLException {
+        try (Connection connection = Database.getConnection();
+             PreparedStatement statement = connection.prepareStatement(
+                     "SELECT 1 FROM dbo.users WHERE email = ? AND user_id <> ?")) {
+            statement.setString(1, email);
+            statement.setLong(2, accountId);
+            try (ResultSet rs = statement.executeQuery()) { return rs.next(); }
+        }
+    }
+
+    public long create(Account account, String passwordHash, long[] roleIds) throws SQLException {
         String insertAccount = """
                 INSERT INTO dbo.users(username, password_hash, email, full_name, phone, status)
                 VALUES (?, ?, ?, ?, ?, 'ACTIVE')
@@ -112,14 +122,69 @@ public class AccountDao {
                         accountId = keys.getLong(1);
                     }
                 }
-                try (PreparedStatement statement = connection.prepareStatement(insertRole)) {
-                    statement.setLong(1, accountId);
-                    statement.setLong(2, roleId);
-                    statement.executeUpdate();
-                }
+                replaceRoles(connection, accountId, roleIds, insertRole);
                 connection.commit();
                 return accountId;
             } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            } finally {
+                connection.setAutoCommit(true);
+            }
+        }
+    }
+
+    public void update(long accountId, Account account, long[] roleIds, long adminId) throws SQLException {
+        String update = """
+                UPDATE dbo.users SET email = ?, full_name = ?, phone = ?, updated_at = SYSDATETIME()
+                WHERE user_id = ? AND status <> 'DELETED'
+                """;
+        try (Connection connection = Database.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                try (PreparedStatement statement = connection.prepareStatement(update)) {
+                    statement.setString(1, account.getEmail());
+                    statement.setString(2, account.getFullName());
+                    statement.setString(3, account.getPhone());
+                    statement.setLong(4, accountId);
+                    if (statement.executeUpdate() != 1) throw new IllegalArgumentException("Account not found or deleted");
+                }
+                try (PreparedStatement statement = connection.prepareStatement(
+                        "DELETE FROM dbo.user_roles WHERE user_id = ?")) {
+                    statement.setLong(1, accountId);
+                    statement.executeUpdate();
+                }
+                replaceRoles(connection, accountId, roleIds,
+                        "INSERT INTO dbo.user_roles(user_id, role_id) VALUES (?, ?)");
+                audit(connection, accountId, "UPDATE", null, null, "Admin updated account", adminId);
+                connection.commit();
+            } catch (SQLException | RuntimeException e) {
+                connection.rollback();
+                throw e;
+            } finally {
+                connection.setAutoCommit(true);
+            }
+        }
+    }
+
+    public void changeStatus(long accountId, String expectedStatus, String newStatus, long adminId) throws SQLException {
+        String update = """
+                UPDATE dbo.users SET status = ?, updated_at = SYSDATETIME()
+                WHERE user_id = ? AND status = ? AND status <> 'DELETED'
+                """;
+        try (Connection connection = Database.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                try (PreparedStatement statement = connection.prepareStatement(update)) {
+                    statement.setString(1, newStatus);
+                    statement.setLong(2, accountId);
+                    statement.setString(3, expectedStatus);
+                    if (statement.executeUpdate() != 1) throw new IllegalStateException("Account state has changed or action is not allowed");
+                }
+                audit(connection, accountId, "STATUS_CHANGE", expectedStatus, newStatus,
+                        expectedStatus + " -> " + newStatus, adminId);
+                connection.commit();
+            } catch (SQLException | RuntimeException e) {
                 connection.rollback();
                 throw e;
             } finally {
@@ -222,6 +287,35 @@ public class AccountDao {
         }
     }
 
+    private void replaceRoles(Connection connection, long accountId, long[] roleIds, String insertSql)
+            throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(insertSql)) {
+            for (long roleId : roleIds) {
+                statement.setLong(1, accountId);
+                statement.setLong(2, roleId);
+                statement.addBatch();
+            }
+            statement.executeBatch();
+        }
+    }
+
+    private void audit(Connection connection, long accountId, String action, String oldStatus,
+                       String newStatus, String reason, long adminId) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement("""
+                INSERT INTO dbo.account_audit_log(
+                    account_id, action_name, old_status, new_status, reason, performed_by)
+                VALUES (?, ?, ?, ?, ?, ?)
+                """)) {
+            statement.setLong(1, accountId);
+            statement.setString(2, action);
+            statement.setString(3, oldStatus);
+            statement.setString(4, newStatus);
+            statement.setString(5, reason);
+            statement.setLong(6, adminId);
+            statement.executeUpdate();
+        }
+    }
+
     private Account mapAccount(ResultSet rs) {
         Account account = new Account();
         try {
@@ -232,10 +326,15 @@ public class AccountDao {
             account.setPhone(rs.getString("phone"));
             account.setStatus(rs.getString("status"));
             account.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+            if (rs.getTimestamp("updated_at") != null) {
+                account.setUpdatedAt(rs.getTimestamp("updated_at").toLocalDateTime());
+            }
             if (rs.getTimestamp("deleted_at") != null) {
                 account.setDeletedAt(rs.getTimestamp("deleted_at").toLocalDateTime());
             }
             account.setDeleteReason(rs.getString("delete_reason"));
+            long deletedBy = rs.getLong("deleted_by");
+            if (!rs.wasNull()) account.setDeletedBy(deletedBy);
             return account;
         } catch (SQLException e) {
             throw new IllegalStateException(e);

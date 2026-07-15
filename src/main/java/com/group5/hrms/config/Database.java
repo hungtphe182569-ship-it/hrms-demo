@@ -6,14 +6,8 @@ import java.sql.SQLException;
 
 public final class Database {
 
-    private static final String URL =
-            "jdbc:sqlserver://localhost:1433;"
-            + "databaseName=HRMS_Demo;"
-            + "encrypt=true;"
-            + "trustServerCertificate=true";
-
-    private static final String USER = "sa";
-    private static final String PASSWORD = "sa";
+    private static final String DEFAULT_URL = "jdbc:sqlserver://localhost:1433;"
+            + "databaseName=HRMS_Demo;encrypt=true;trustServerCertificate=true";
 
     private Database() {
     }
@@ -29,6 +23,14 @@ public final class Database {
     }
 
     public static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(URL, USER, PASSWORD);
+        return DriverManager.getConnection(
+                env("HRMS_DB_URL", DEFAULT_URL),
+                env("HRMS_DB_USER", "sa"),
+                env("HRMS_DB_PASSWORD", "sa"));
+    }
+
+    private static String env(String name, String fallback) {
+        String value = System.getenv(name);
+        return value == null || value.isBlank() ? fallback : value.trim();
     }
 }

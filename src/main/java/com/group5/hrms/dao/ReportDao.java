@@ -26,6 +26,22 @@ public class ReportDao {
                     LEFT JOIN dbo.users u ON u.user_id = ur.user_id AND u.status <> 'DELETED'
                     GROUP BY r.role_name ORDER BY r.role_name
                     """));
+            if (tableExists(connection, "permissions") && tableExists(connection, "role_permissions")) {
+                stats.setPermissionsByRole(loadMap(connection, """
+                        SELECT r.role_name AS label, COUNT(rp.permission_id) AS total
+                        FROM dbo.roles r
+                        LEFT JOIN dbo.role_permissions rp ON rp.role_id = r.role_id
+                        GROUP BY r.role_name ORDER BY r.role_name
+                        """));
+                stats.setTotalPermissions(loadCount(connection, "SELECT COUNT(*) FROM dbo.permissions"));
+            }
+            if (tableExists(connection, "attendance")) {
+                stats.setAttendanceByStatus(loadMap(connection, """
+                        SELECT status AS label, COUNT(*) AS total
+                        FROM dbo.attendance GROUP BY status ORDER BY status
+                        """));
+                stats.setAttendanceRecords(loadCount(connection, "SELECT COUNT(*) FROM dbo.attendance"));
+            }
         }
         return stats;
     }
@@ -58,5 +74,20 @@ public class ReportDao {
             while (rs.next()) result.put(rs.getString("label"), rs.getInt("total"));
         }
         return result;
+    }
+
+    private int loadCount(Connection connection, String sql) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet rs = statement.executeQuery()) {
+            return rs.next() ? rs.getInt(1) : 0;
+        }
+    }
+
+    private boolean tableExists(Connection connection, String tableName) throws SQLException {
+        try (PreparedStatement statement = connection.prepareStatement(
+                "SELECT 1 FROM sys.tables WHERE name = ?")) {
+            statement.setString(1, tableName);
+            try (ResultSet rs = statement.executeQuery()) { return rs.next(); }
+        }
     }
 }

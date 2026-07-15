@@ -12,7 +12,9 @@ public class Account {
     private String phone;
     private String status;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private LocalDateTime deletedAt;
+    private Long deletedBy;
     private String deleteReason;
     private List<Role> roles = new ArrayList<>();
 
@@ -30,8 +32,12 @@ public class Account {
     public void setStatus(String status) { this.status = status; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
     public LocalDateTime getDeletedAt() { return deletedAt; }
     public void setDeletedAt(LocalDateTime deletedAt) { this.deletedAt = deletedAt; }
+    public Long getDeletedBy() { return deletedBy; }
+    public void setDeletedBy(Long deletedBy) { this.deletedBy = deletedBy; }
     public String getDeleteReason() { return deleteReason; }
     public void setDeleteReason(String deleteReason) { this.deleteReason = deleteReason; }
     public List<Role> getRoles() { return roles; }
@@ -39,5 +45,13 @@ public class Account {
 
     public String getRoleNames() {
         return roles.stream().map(Role::getName).sorted().reduce((a, b) -> a + ", " + b).orElse("—");
+    }
+
+    public boolean hasRole(String roleName) {
+        return roles.stream().anyMatch(role -> role.getName().equalsIgnoreCase(roleName));
+    }
+
+    public boolean hasRoleId(long roleId) {
+        return roles.stream().anyMatch(role -> role.getId() == roleId);
     }
 }

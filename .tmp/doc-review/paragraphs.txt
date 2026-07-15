@@ -1,0 +1,774 @@
+﻿00001: 5. UCs for Admin5.1.USE CASE: MANAGE ACCOUNT (link)5.1.A. UCs Diagram5.1.B. Communication Diagram
+00002: 5.1.C. Statechart Diagram
+00003: USE CASE: MANAGE ACCOUNT 
+00004: Field
+00005: Content
+00006: ID and Name
+00007: UC17 - Manage Account 
+00008: Primary Actor
+00009: Admin 
+00010: Secondary Actors
+00011: None 
+00012: Description
+00013: This use case allows the Admin to create, view, update, delete, and reset passwords for user accounts. The system validates account information, manages account status and permissions, and stores all changes securely. 
+00014: Trigger
+00015: The Admin selects the "Account Management" menu. 
+00016: Preconditions
+00017: The system is running normally.
+00018: - The Admin has successfully logged into the system.
+00019: - The Admin has permission to manage user accounts. 
+00020: Postconditions
+00021: - Account information is successfully created, updated, deleted, viewed, or reset.
+00022: - User permissions and account status are updated in the system. 
+00023: Normal Flow
+00024: 1. The Admin accesses the Account Management page.
+00025: 2. The system displays the list of user accounts.
+00026: 3. The Admin selects a function (Create / View / Update / Delete / Reset Password).
+00027: 4. The Admin enters or modifies account information.
+00028: 5. The Admin clicks the appropriate action button (Save / Delete / Reset Password).
+00029: 6. The system validates the entered data.
+00030: 7. The system saves the account changes to the database.
+00031: 8. The system updates user permissions and account status if applicable.
+00032: 9. The system displays a success notification to the Admin. 
+00033: Alternative Flows
+00034: AF1 — Duplicate Username:At step 6, if the username already exists:
+00035: - The system displays a duplicate username error message.
+00036: - The system requests the Admin to enter another username.
+00037: AF2 — Missing Required Information:At step 6, if mandatory fields are empty:
+00038: - The system displays validation error messages.
+00039: - The system highlights the missing fields and requests re-entry.
+00040: AF3 — Save Failure:At step 7, if the system cannot save the account information:
+00041: - The system displays a database/server error message.
+00042: - No changes are stored in the database.
+00043: - The Admin may retry the operation.
+00044: AF4 — Role In Use During Deletion:
+00045: At step 7, if the account is linked to critical system data and cannot be deleted:
+00046: - The system displays a warning message.
+00047: - The deletion request is cancelled. 
+00048: Exceptions
+00049: - Database connection failure.
+00050: - Server timeout.
+00051: - Unexpected system error during account processing. 
+00052: Business Rules 
+00053: - Username must be unique in the system.
+00054: - Username cannot be empty.
+00055: - Email address must be in a valid format.
+00056: - Password must satisfy system security requirements.
+00057: - Only Admin users can create, update, delete, or reset accounts.
+00058: - An account must have at least one assigned role.
+00059: - Deleted or disabled accounts cannot access the system. 
+00060: 5.1.D:Mockup Diagram:
+00061: 5.2.USE CASE:VIEW REPORT AND STATISTIC5.2.A. UCs Diagram
+00062: 5.2.B. Communication Diagram
+00063: 5.2.C.Statechart Diagram
+00064: USE CASE: VIEW REPORTS AND STATISTICS 
+00065: Field
+00066: Content
+00067: ID and Name
+00068: UC18 - View Reports and Statistics  
+00069: Primary Actor
+00070: Admin 
+00071: Secondary Actors
+00072: None 
+00073: Description
+00074: This use case allows the Admin to view reports, attendance statistics, permission statistics, and export reports in Excel or PDF format for management and decision-making purposes. 
+00075: Trigger
+00076: The Admin selects the "Reports and Analytics" menu. 
+00077: Preconditions
+00078: - The system is running normally.
+00079: - Report data exists in the database.
+00080: - The Admin has permission to access reports and statistics. 
+00081: Postconditions
+00082: - The Admin successfully views reports and statistics.
+00083: - Report files may be exported successfully.
+00084: - No system data is modified. 
+00085: Normal Flow
+00086: 1. The Admin accesses the Reports and Analytics page.
+00087: 2. The system displays available reports and statistics categories.
+00088: 3. The Admin selects a report type ( Report / Attendance Statistics / Permission Statistics).
+00089: 4. The system retrieves the corresponding report data from the database.
+00090: 5. The system generates and displays charts, tables, or statistical information.
+00091: 6. The Admin selects an export option (Excel or PDF).
+00092: 7. The system generates the report file.
+00093: 8. The system exports the report successfully and provides the file for download.
+00094: 9. The system displays a success notification to the Admin. 
+00095: Alternative Flows
+00096: 4.1 — Invalid Report Selection:
+00097: At step 4, if the selected report type is unavailable or invalid:
+00098: The system displays a warning message.
+00099: The Admin selects another valid report type.
+00100: 5.1 — No Report Data Found:
+00101: At step 5, if no data exists for the selected report:
+00102: The system displays the message "No report data found."
+00103: The Admin may select another report type or modify the filter criteria.
+00104: 9.1 — Export Failure:
+00105: At step 9, if the report generation or export process fails:
+00106: The system displays an export error message.
+00107: The report remains viewable on the screen.
+00108: The Admin may retry the export operation. 
+00109: Exceptions
+00110: - Database connection failure.
+00111: - Report generation service unavailable.
+00112: - File export service timeout.
+00113: - Unexpected server error during report processing. 
+00114: Business Rules 
+00115: - Only users with Admin privileges can access reports and analytics.
+00116: - Reports are generated from existing data in the database.
+00117: - Exported reports are available only in Excel (.xlsx) or PDF (.pdf) formats.
+00118: - Viewing and exporting reports do not modify any system data.
+00119: - Statistics displayed must reflect the latest available data in the database. 
+00120: 5.2.C. Mockup Diagram:
+00121: 5.3.USE CASE:MANAGE ROLES5.3.A. UCs Diagram
+00122: 2.6.3.B. Communication Diagram
+00123: USE CASE: MANAGER ROLES
+00124: Field
+00125: Content
+00126: ID and Name
+00127: UC19 - Manage Roles  
+00128: Primary Actor
+00129: Admin 
+00130: Secondary Actors
+00131: None 
+00132: Description
+00133: This use case allows Admin to create, assign, update, and delete roles in the system. It ensures that access control permissions are managed properly and securely for all users. 
+00134: Trigger
+00135: The Admin selects the "Role Management" menu. 
+00136: Preconditions
+00137: -The system is running normally.
+00138: -Admin has successfully logged into the system.
+00139: -Admin has permission to manage roles.
+00140: Postconditions
+00141: -Role information is successfully updated in the system.
+00142: -Access control settings are applied according to the updated roles.
+00143: -User-role assignments are stored successfully.
+00144: Normal Flow
+00145: The Admin accesses the Role Management page.
+00146: The system displays all existing roles.
+00147: The Admin selects a function (Create Role / Assign Role / Update Role / Delete Role).
+00148: The Admin enters or modifies role information.
+00149: The Admin clicks the "Submit" button.
+00150: The system validates the entered role data.
+00151: The system saves the role information and updates role assignments if applicable.
+00152: The system displays a success notification to the Admin.
+00153: Alternative Flows
+00154: AF1 — Duplicate Role Name
+00155: At step 6, if the role name already exists:
+00156: The system displays a warning message indicating that the role name already exists.
+00157: The system keeps the entered data.
+00158: The Admin is prompted to enter another role name.
+00159: AF2 — Role Assigned to Users
+00160: At step 7, if the Admin attempts to delete a role that is currently assigned to one or more users:
+00161: The system prevents the deletion operation.
+00162: The system displays an error message indicating that the role is currently in use.
+00163: The role remains unchanged.
+00164: AF3 — Missing Required Information
+00165: At step 6, if required information is missing:
+00166: The system displays validation error messages.
+00167: The system highlights invalid or empty fields.
+00168: The Admin is prompted to complete the required information.
+00169: AF4 — System Save Failure
+00170: At step 7, if the system fails to save role information due to database or server issues:
+00171: The system displays an error notification.
+00172: No changes are saved.
+00173: The Admin may retry the operation.
+00174: Exceptions
+00175: -Database connection failure.
+00176: -Server processing error.
+00177: -Unauthorized access to role management functions.
+00178: Business Rules 
+00179: -Each role name must be unique within the system.
+00180: -A role cannot be deleted while it is assigned to one or more users.
+00181: -Only Admin users are allowed to create, update, assign, or delete roles.
+00182: 5.3.C.Statechart Diagram:
+00183: 5.3.D.Mockup Diagram:
+00184: Pre3
+00185: RELATIONAL DATABASE DESIGN SPECIFICATION
+00186: STEP 1: Entity Class → Database Table
+00187: At this stage, the system retains only the entity classes that store persistent data and eliminates intermediate classes such as Controller, Service, or Repository.
+00188: Entity Class User → Table User: Stores login account information and basic user profiles for the system.
+00189: Entity Class Role → Table Role: Stores a list of roles (Admin, Manager, Employee,...) used in the system.
+00190: Entity Class UserRole → Table User_Role:Storing data that maps users to roles serves the purpose of user permission management.
+00191: Entity Class RolePermission → Table Role_Permission:Store data that maps roles to the permissions granted to those roles.
+00192: STEP 2: Primary Key (PK) Definition
+00193: Each table is assigned a primary key (PK) to uniquely identify each record.
+00194: User (user_id, username, password_hash, email, full_name, phone, status, created_at)
+00195: Role (role_id, role_name, description)
+00196: User_Role (user_role_id, user_id, role_id)
+00197: Role_Permission (role_permission_id, role_id, permission_id)
+00198: Engineering architecture:
+00199: All xxx_id identifier fields are implemented using the Surrogate Key mechanism, employing the INT AUTO_INCREMENT (or IDENTITY depending on the database management system) data type to optimize query performance, indexing, and future system scalability.
+00200: STEP 3: Foreign Key (FK) for Associations
+00201: Based on the relationships in the Class Diagram and ERD, the foreign keys are set up as follows:
+00202: The User → User_Role (1 – Many) relationship
+00203: A user can be assigned multiple roles.
+00204: Solution: Set the foreign key user_id in the User_Role table to reference the primary key user_id of the User table.
+00205: Relationship Role → User_Role (1 – Many)
+00206: A role can be assigned to multiple users.
+00207: Solution: Set the foreign key role_id in the User_Role table to reference the primary key role_id of the Role table.
+00208: Relationship Role → Role_Permission (1 – Many)
+00209: A single role can possess various levels of authority.
+00210: Solution: Set the foreign key role_id in the Role_Permission table to reference the primary key role_id of the Role table.
+00211: STEP 4: Aggregation / Composition Hierarchy
+00212: Systemic relationship:
+00213: Role ◇ → Role_Permission
+00214: Each Role acts as the overall entity (Whole), containing a set of permissions linked through the Role_Permission table.
+00215: Structural solution: This relationship is implemented using the foreign key role_id in the Role_Permission table.
+00216: This foreign key establishes a Referential Integrity Constraint with the Role table, ensuring that all assigned permissions belong to a valid role that exists in the system.
+00217: STEP 5: Generalization / Specialization Hierarchy (Inheritance)
+00218: The Admin Management system does not implement a data inheritance mechanism between entities.
+00219: All user account information is stored directly in the User table, while user classification into Admin, Manager, or Employee is done through the Role-Based Access Control (RBAC) mechanism.
+00220: This mechanism uses the User_Role table to associate users with roles instead of building separate inheritance tables.
+00221: Evaluating the solution:
+00222: RBAC design enables a simple, flexible, maintainable, and scalable database structure. When new roles arise in the future, the system only needs to add the data to the Role table without changing the structure of the User table.
+00223: WORK DIVISION & OPERATIONS DEFINITION
+00224: 1.1. Coordination Layer — AccountController Class (Control Class)
+00225: Operations are defined as follows:
+00226: createAccount()
+00227: viewAccounts()
+00228: updateAccount()
+00229: deleteAccount()
+00230: resetPassword()
+00231: How to define and how to operate:
+00232: -createAccount():The input receives a Request DTO packet containing username, password, email, fullName, phone, and roleId from the administration interface.
+00233: This function is responsible for checking the basic data and then passing the request down to the business layer via AccountService.createAccount().
+00234: -updateAccount():Activated when the Admin edits account information on the interface.
+00235: The controller receives the userId and update information, packages the data, and calls AccountService.updateAccount() to process it.
+00236: -deleteAccount():Capture the event when the Admin selects the account deletion function.
+00237: The controller retrieves the userId identifier from the request and forwards the request to AccountService.deleteAccount().
+00238: -resetPassword():Activated when the Admin clicks the Reset Password button.
+00239: The controller receives the userId and sends a password reset request to AccountService.resetPassword().
+00240: 1.2. Business Logic Layer — AccountService Class (Business Logic Class)
+00241: Operations are defined as follows:
+00242: createAccount()
+00243: viewAccounts()
+00244: updateAccount()
+00245: deleteAccount()
+00246: resetPassword()
+00247: How to define and how to operate:
+00248: -createAccount():This function checks the validity of account data.
+00249: The system verifies that the username does not exist, the email address is in the correct format, and the password meets security requirements. If the data is valid, the system creates a new account and assigns a corresponding role through the User_Role table.
+00250: -updateAccount():Update user account information.
+00251: The system checks the edited data, updates personal information, account status, and assigned roles if necessary.
+00252: -deleteAccount():Contains business rules related to account deletion.
+00253: Before deleting, the system checks if the account is linked to sensitive data or is being used within the system. If there is a data binding, the system rejects the operation and returns an error message.
+00254: -resetPassword():This function is triggered when the administrator requests a password reset for a user.
+00255: The system generates new passwords or default passwords, encrypting them using a hashing algorithm before storing them in the database to ensure information security.
+00256: 1.3. Data Entity Layer — User Class (Entity Class)
+00257: Operations are defined as follows:
+00258: create()
+00259: update()
+00260: delete()
+00261: resetPassword()
+00262: How to define and how to operate:
+00263: create():Responsible for interacting directly with the data storage layer.
+00264: When called from the Service layer, the function executes the SQL statement INSERT INTO User (...) VALUES (...) to create a new account record in the database.
+00265: update():Update the information for an existing account.
+00266: This function executes the SQL statement UPDATE User SET ... WHERE user_id = ? to synchronize the new data to the database.
+00267: delete():Responsible for deleting account records from the database or changing their status to Inactive, depending on system policy.
+00268: The function executes the SQL statement DELETE FROM User WHERE user_id = ? or UPDATE User SET status = 'Inactive'.
+00269: resetPassword():Update the password_hash field of the account.
+00270: The function executes the SQL statement UPDATE User SET password_hash = ? WHERE user_id = ?.
+00271: System Interaction Flow Evaluation (Module Workflow Evaluation)
+00272: Because a single member handles all Account Management functions, the source code structure is organized in a hierarchical model to ensure system consistency and maintainability.
+00273: Communication between AccountController and AccountServiceAdhering to the Loose Coupling principle through Data Transfer Objects (DTOs).
+00274: All relevant business rulesCreate, update, delete, and reset passwords.The accounts are centralized in the classroom.AccountService.
+00275: Class UserResponsible for managing account data and interacting directly with the relational database designed in the Relational Database Design Specification.
+00276: This structure clearly separates the user interface, system business logic, and stored data, while ensuring security, data integrity, and future scalability.
+00277: Pattern
+00278: DETAILED DESIGN
+00279: 1.1 Pattern
+00280: Pattern 11. Name:Facade Pattern (Structural Pattern)
+00281: The Facade Pattern provides a unified interface for a set of classes in a subsystem. Instead of the Controller interacting with many different objects, the Controller only works with a single Facade.
+00282: 2. ProblemIn function Manage Account When an administrator creates an account or resets a password, the system has to work with several components:
+00283: Account
+00284: Role
+00285: AccountRepository
+00286: PasswordEncoder
+00287: EmailService
+00288: NotificationService
+00289: If AccountController communicates directly with all the classes above, then:
+00290: The controller depends on too many classes.
+00291: Coupling between components increases.
+00292: The system is difficult to maintain and expand.
+00293: Every change in the account creation or password reset process affects the Controller.
+00294: The problem is that we need a mechanism that allows the Controller to work with only a single object instead of having to manage the entire subsystem.
+00295: 3. Solution
+00296: Apply the Facade Pattern using the class:AccountManagementServiceIt plays the role of a facade.
+00297: The controller only calls high-level operations:
+00298: createAccount()
+00299: updateAccount()
+00300: deleteAccount()
+00301: resetPassword()
+00302: The AccountManagementService will then automatically manage the underlying subsystems:
+00303: Account
+00304: Role
+00305: AccountRepository
+00306: PasswordEncoder
+00307: EmailService
+00308: NotificationService
+00309: 4. Consequences
+00310: Benefits
+00311: Reduce coupling between the Controller and the Entities.
+00312: Simplify the business process layer.
+00313: The system is easy to maintain and expand.
+00314: Conceal the complexity of the subsystem.
+00315: The controller only needs to know AccountManagementService.
+00316: Costs
+00317: A service can become a large class if it contains too much business logic.
+00318: Responsibilities need to be divided properly to avoid God Class.
+00319: Pattern 21. Name:State Pattern (Behavioral Pattern)
+00320: The State Pattern allows an object to change its behavior when its internal state changes. Instead of using multiple if-else statements, the behavior of each state is encapsulated in separate classes.
+00321: 2. Problem
+00322: In functionManage AccountEach account can be in the following states:
+00323: ACTIVE
+00324: INACTIVE
+00325: LOCKED
+00326: Each state allows or restricts different actions:
+00327: State
+00328: Allowed Actions
+00329: ACTIVE
+00330: Update, Reset Password
+00331: INACTIVE
+00332: Activate
+00333: LOCKED
+00334: Unlock
+00335: If deployed using the conventional method:
+00336: if(status == ACTIVE){
+00337:    ...
+00338: }
+00339: else if(status == LOCKED){
+00340:    ...
+00341: }
+00342: else if(status == INACTIVE){
+00343:    ...
+00344: }
+00345: As the number of states increases, the source code becomes difficult to maintain and difficult to extend.
+00346: 3. Solution
+00347: Apply the State Pattern by examining:Account (Context Class).
+00348: Tạo interface:AccountStateDefine the behaviors:
+00349: activate()
+00350: deactivate()
+00351: lock()
+00352: unlock()
+00353: Each state is implemented as a separate class:
+00354: ActiveState
+00355: InactiveState
+00356: LockedState
+00357: 4. ConsequencesBenefits
+00358: Remove complex if-else blocks.
+00359: Each state is managed by a separate class.
+00360: It's easy to add new states.
+00361: Adhere to the Open/Closed Principle.
+00362: Improve system maintainability.
+00363: Costs
+00364: Increase the number of classes.
+00365: The design is more complex.
+00366: Not suitable for overly simple systems.
+00367: Result
+00368: Applying the State Pattern helps Account Managers manage the state lifecycle clearly and flexibly. System behavior changes according to each business state (ACTIVE, INACTIVE, LOCKED) without the need for complex conditional blocks.
+00369: 1.2 Class Operations
+00370: 1.2.1 Business Logic Layer — AccountManagementService Layer
+00371: Operations are defined as follows:
+00372: createAccount(...)
+00373: How it is determined: This operation is determined from the Normal Flow of Use Case UC17 when the Admin clicks the Create Account button and the following Business Rules:Username must be unique in the system.Username cannot be empty.Email address must be in a valid format.Password must satisfy system security requirements.An account must have at least one assigned role.Work
+00374: Check if the email exists.
+00375: Password encryption.
+00376: Create a new account.
+00377: Save the data.
+00378: Send activation email.
+00379: resetPassword(accountId)
+00380: How to determine:This operation is defined fromBusiness Rule:
+00381: Only Admin users can create, update, delete, or reset accounts. .
+00382: Work
+00383: Generate a new password.
+00384: Password encryption.
+00385: Update the data.
+00386: Send an email notification.
+00387: 1.2.2 Data Entity Layer — Account Layer
+00388: The operations are defined.
+00389: activate()
+00390: deactivate()
+00391: lock()
+00392: activate()How to determine:From Alternative Flow:
+00393: Admin reactivates INACTIVE accountWork
+00394: INACTIVE → ACTIVE
+00395: lock()How to determine:From Business Rule:
+00396: BR02:
+00397: Accounts that violate the policy may be suspended.Work
+00398: ACTIVE → LOCKED
+00399: 1.3 Relational Database Design
+00400: Steps to create a table design -Step 1 – Identify Domain Classes
+00401: Account
+00402: Role
+00403: -Step 2 – Determine Relationships
+00404: Role (1)|------< Account (N)
+00405: Step 3 – Transform to Tables (2 types of tables)
+00406: Table Type
+00407: Table Name
+00408: Design Basis
+00409: Description
+00410: Entity Table
+00411: Account
+00412: Domain Class
+00413: Store user account information in the system.
+00414: Lookup Table
+00415: Role
+00416: Business Rule
+00417: Store a list of roles that can be assigned to an account.
+00418: Table Type 1 – Entity Table
+00419: Board:Account
+00420: Account(
+00421:     AccountID PK,
+00422: Full Name,
+00423:     Email UNIQUE,
+00424:     Password,
+00425:     Status,
+00426:     CreatedDate,
+00427: RoleID FK
+00428: )
+00429: Table Type 2 – Lookup Table
+00430: Role
+00431: Role(
+00432: RoleID PK,
+00433:     RoleName
+00434: )
+00435: Sample Data
+00436: RoleID
+00437: RoleName
+00438: 1
+00439: Admin
+00440: 2
+00441: Manager
+00442: 3
+00443: Staff
+00444: 1.4 Pseudocode
+00445: Operation 1: createAccount()
+00446: FUNCTION createAccount(
+00447:     username,
+00448:     email,
+00449:     password,
+00450: roleId
+00451: )
+00452:    IF username IS EMPTY THEN
+00453:        RETURN "Username cannot be empty"
+00454:    END IF
+00455:    IF username ALREADY EXISTS THEN
+00456:        RETURN "Username already exists"
+00457:    END IF
+00458:    IF email FORMAT IS INVALID THEN
+00459:        RETURN "Invalid email address"
+00460:    END IF
+00461:    IF password DOES NOT SATISFY SECURITY REQUIREMENTS THEN
+00462:        RETURN "Invalid password"
+00463:    END IF
+00464:    IF roleId IS NULL THEN
+00465:        RETURN "Role is required"
+00466:    END IF
+00467:    Create Account
+00468:    RETURN "Account Created Successfully"
+00469: END FUNCTION
+00470: Operation 2: resetPassword(accountId)
+00471: FUNCTION resetPassword(accountId)
+00472:    account ← Find Account(accountId)
+00473:    IF account IS NULL THEN
+00474:        RETURN "Account Not Found"
+00475:    END IF
+00476:    newPassword ← Generate Random Password()
+00477:    encryptedPassword ← Encode(newPassword)
+00478:    account.password ← encryptedPassword
+00479:    Update Account(account)
+00480:    Send Password Email(account, newPassword)
+00481:    RETURN "Password Reset Successfully"
+00482: END FUNCTION
+00483: Intent → Problem/Motivation → Solution → Consequences 
+00484: BỔ SUNG TT4 CÁ NHÂN – UC17 MANAGE ACCOUNT
+00485: Nội dung bổ sung từ mục 7 đến mục VI. Use case được sử dụng: UC17 – Manage Account.
+00486: 7. Cách thức chuyển từ Detail Design sang Code và giải thích
+00487: Quá trình chuyển đổi được thực hiện theo chuỗi truy vết:
+00488: Requirement → Analysis → Architecture → Detailed Design→ Database Design → Pseudocode → Source Code → Testing
+00489: 7.1. Chuyển Requirement sang Analysis
+00490: Từ main sequence của UC17, system event “Admin nhấn Create Account” được chuyển thành system operation createAccount(). Các business rule tiếp tục tạo ra operation kiểm tra và xử lý tương ứng.
+00491: Admin nhấn Create Account → createAccount(request, adminId).
+00492: Username phải duy nhất → existsByUsername(username).
+00493: Password phải bảo mật → encode(rawPassword).
+00494: Account phải có role → findRoles(roleIds).
+00495: Các class phân tích được xác định gồm ManageAccountPage, AccountController, AccountManagementService, Account, Role, AccountRepository, PasswordEncoder và NotificationService.
+00496: 7.2. Chuyển Analysis sang Architecture
+00497: ManageAccountPage thuộc Presentation Layer và chịu trách nhiệm nhận thao tác, hiển thị dữ liệu.
+00498: AccountController thuộc Controller/API Layer và chịu trách nhiệm nhận request, trả response.
+00499: AccountManagementService thuộc Business Logic Layer và chịu trách nhiệm xử lý business rules, điều phối các subsystem.
+00500: Account thuộc Domain/Entity Layer và chịu trách nhiệm bảo vệ dữ liệu, trạng thái tài khoản.
+00501: AccountRepository thuộc Data Access Layer và chịu trách nhiệm truy vấn, lưu dữ liệu.
+00502: PasswordEncoder và NotificationService thuộc Infrastructure Layer.
+00503: ManageAccountPage        ↓AccountController        ↓AccountManagementService / Facade        ↓AccountRepository        ↓Relational Database
+00504: Controller không truy cập trực tiếp database. Entity không trực tiếp thực hiện SQL. Tất cả thao tác lưu trữ được thực hiện qua Repository để giữ đúng hướng phụ thuộc của Layered Architecture.
+00505: 7.3. Chuyển Class Design sang Code
+00506: Boundary ManageAccountPage → page/component quản lý tài khoản.
+00507: Control AccountController → REST Controller/API endpoint.
+00508: AccountManagementService → Business Service/Facade.
+00509: Entity Account và Role → Domain Model/ORM Entity.
+00510: AccountRepository → Repository interface.
+00511: CreateAccountRequest → Request DTO.
+00512: AccountResponse → Response DTO.
+00513: Duplicate Username flow → Business exception và exception handler.
+00514: User, Role, User_Role → Entity mapping và database migration.
+00515: Ví dụ luồng code của operation tạo tài khoản:
+00516: POST /api/accounts  → AccountController.createAccount()  → AccountManagementService.createAccount()  → AccountRepository.existsByUsername()  → PasswordEncoder.encode()  → AccountRepository.save()  → AccountResponse
+00517: 7.4. Chuyển Communication Diagram sang Code
+00518: Mỗi message trong Communication Diagram được chuyển thành một lời gọi method. Thứ tự lời gọi trong code phải phù hợp với thứ tự message trong sơ đồ.
+00519: Admin gửi dữ liệu → AccountController.createAccount().
+00520: Controller chuyển request → AccountManagementService.createAccount().
+00521: Service kiểm tra username → AccountRepository.existsByUsername().
+00522: Service tìm role → RoleRepository.findAllById().
+00523: Service mã hóa password → PasswordEncoder.encode().
+00524: Service lưu Account → AccountRepository.save().
+00525: Service trả kết quả → AccountResponse.from(account).
+00526: 7.5. Chuyển Statechart sang Code
+00527: Các trạng thái trong Statechart được chuyển thành enum:
+00528: public enum AccountStatus {    PENDING_ACTIVATION,    ACTIVE,    INACTIVE,    LOCKED,    DELETED}
+00529: Các transition được chuyển thành domain operation activate(), deactivate(), lock(), unlock() và softDelete(). Entity tự kiểm tra trạng thái hiện tại trước khi cho phép chuyển trạng thái.
+00530: 7.6. Chuyển Database Design và Pseudocode sang Code
+00531: User table → Account/User entity.
+00532: Role table → Role entity.
+00533: User_Role → quan hệ nhiều-nhiều Account–Role.
+00534: Role_Permission → quan hệ nhiều-nhiều Role–Permission.
+00535: Mỗi điều kiện IF trong pseudocode → validation hoặc exception trong Service/Entity.
+00536: Mỗi thao tác lưu → Repository operation trong transaction.
+00537: if (accountRepository.existsByUsername(request.getUsername())) {    throw new DuplicateUsernameException(request.getUsername());}String passwordHash = passwordEncoder.encode(request.getPassword());Account savedAccount = accountRepository.save(account);
+00538: 7.7. Chuyển Alternative Flow sang Exception Handling
+00539: Alternative flow Duplicate Username được triển khai bằng DuplicateUsernameException. Exception handler chuyển lỗi thành response có mã DUPLICATE_USERNAME. Transaction không ghi dữ liệu nếu alternative flow xảy ra.
+00540: {  "code": "DUPLICATE_USERNAME",  "message": "Username already exists"}
+00541: 7.8. Kiểm tra tính nhất quán
+00542: Mỗi system operation có method tương ứng trong Controller hoặc Service.
+00543: Mỗi business rule có validation hoặc domain rule tương ứng.
+00544: Mỗi trạng thái có giá trị trong AccountStatus.
+00545: Mỗi alternative flow có exception hoặc nhánh xử lý.
+00546: Mỗi bảng có entity hoặc migration tương ứng.
+00547: Main flow và alternative flow có test tương ứng.
+00548: IV. Điều chỉnh use case
+00549: Use case được điều chỉnh: UC17 – Manage Account.
+00550: Nội dung thay đổi: thay thao tác hard delete bằng soft delete. Record tài khoản vẫn được giữ để bảo toàn dữ liệu lịch sử, nhưng tài khoản không thể đăng nhập hoặc tiếp tục sử dụng hệ thống.
+00551: Lý do: hard delete có thể làm mất dữ liệu lịch sử, phá vỡ foreign key và không đáp ứng yêu cầu audit. Soft delete giúp truy vết người thực hiện, thời gian và lý do xóa.
+00552: 8. Requirement thay đổi
+00553: 8.1. Requirement cũ
+00554: Admin chọn một tài khoản và chọn Delete Account.
+00555: Hệ thống yêu cầu xác nhận.
+00556: Sau khi xác nhận, hệ thống xóa record khỏi database.
+00557: Nếu tài khoản liên kết dữ liệu quan trọng, hệ thống hủy yêu cầu xóa.
+00558: 8.2. Requirement mới – Main Sequence
+00559: Admin truy cập trang Account Management.
+00560: Hệ thống hiển thị danh sách tài khoản chưa bị xóa.
+00561: Admin chọn một tài khoản và chọn Delete Account.
+00562: Hệ thống hiển thị hộp thoại xác nhận và yêu cầu nhập lý do.
+00563: Admin nhập lý do và xác nhận.
+00564: Hệ thống kiểm tra quyền của Admin.
+00565: Hệ thống kiểm tra tài khoản tồn tại.
+00566: Hệ thống kiểm tra Admin không tự xóa tài khoản đang đăng nhập.
+00567: Hệ thống chuyển trạng thái tài khoản sang DELETED.
+00568: Hệ thống lưu deletedAt, deletedBy và deleteReason.
+00569: Hệ thống thu hồi các session đang hoạt động của tài khoản.
+00570: Hệ thống loại tài khoản khỏi danh sách mặc định.
+00571: Hệ thống hiển thị thông báo xóa tài khoản thành công.
+00572: 8.3. Preconditions và Postconditions
+00573: Preconditions:
+00574: Admin đã đăng nhập và có quyền MANAGE_ACCOUNT.
+00575: Tài khoản cần xóa tồn tại và chưa có trạng thái DELETED.
+00576: Postconditions:
+00577: Record vẫn tồn tại trong database và có trạng thái DELETED.
+00578: Tài khoản không thể đăng nhập; session đang hoạt động bị thu hồi.
+00579: Người xóa, thời gian và lý do xóa được lưu để audit.
+00580: 8.4. Alternative Flows mới
+00581: AF1 – Account not found: hệ thống không thay đổi database và trả thông báo Account not found.
+00582: AF2 – Account already deleted: hệ thống từ chối cập nhật lần hai và trả Account already deleted.
+00583: AF3 – Self-deletion: nếu Admin xóa chính tài khoản đang đăng nhập, hệ thống trả You cannot delete your own account.
+00584: AF4 – Missing deletion reason: hệ thống đánh dấu trường lý do và yêu cầu Admin nhập lại.
+00585: AF5 – Database failure: transaction rollback; trạng thái và session không thay đổi; hệ thống trả thông báo lỗi.
+00586: 8.5. Business Rules mới
+00587: BR01: Chỉ Admin có quyền MANAGE_ACCOUNT mới được xóa tài khoản.
+00588: BR02: Admin không được tự xóa tài khoản đang đăng nhập.
+00589: BR03: Xóa tài khoản phải được thực hiện bằng soft delete.
+00590: BR04: Lý do xóa là bắt buộc.
+00591: BR05: Tài khoản DELETED không thể đăng nhập.
+00592: BR06: Record bị xóa phải được giữ để phục vụ audit.
+00593: BR07: Session của tài khoản phải bị thu hồi sau khi soft delete thành công.
+00594: 9. Phân tích tĩnh và động sau thay đổi
+00595: 9.1. Phân tích tĩnh
+00596: AccountController: thêm endpoint soft delete.
+00597: AccountManagementService: thêm system operation softDeleteAccount().
+00598: Account: thêm thông tin audit và domain operation softDelete().
+00599: AccountRepository: chuyển từ delete sang update trạng thái.
+00600: SessionService: thu hồi session của tài khoản.
+00601: DeleteAccountRequest: mang dữ liệu lý do xóa.
+00602: AccountStatus: bổ sung hoặc sử dụng trạng thái DELETED.
+00603: Account--------------------------------- id: Long- status: AccountStatus- deletedAt: LocalDateTime- deletedBy: Long- deleteReason: String--------------------------------+ softDelete(deletedBy, reason, currentTime): void+ canLogin(): boolean+ isDeleted(): boolean
+00604: AccountManagementService+ softDeleteAccount(accountId, adminId, reason): DeleteAccountResultSessionService+ revokeAllSessions(accountId): void
+00605: 9.2. Phân tích động
+00606: Admin chọn Delete Account và nhập lý do.
+00607: ManageAccountPage gửi accountId và reason đến AccountController.
+00608: Controller gọi AccountManagementService.softDeleteAccount().
+00609: Service kiểm tra quyền và kiểm tra Admin không tự xóa mình.
+00610: Service gọi AccountRepository.findById().
+00611: Service gọi domain operation Account.softDelete().
+00612: Account chuyển trạng thái sang DELETED và lưu audit fields.
+00613: Repository cập nhật Account trong database.
+00614: SessionService thu hồi toàn bộ session.
+00615: Controller trả kết quả; giao diện loại tài khoản khỏi danh sách.
+00616: State transition sau thay đổi:
+00617: ACTIVE   ─┐INACTIVE ─┼── softDelete() ──→ DELETED → FinalLOCKED   ─┘
+00618: Guard conditions: Admin có quyền MANAGE_ACCOUNT; Admin không tự xóa; lý do không rỗng; trạng thái hiện tại không phải DELETED.
+00619: 10. Thiết kế kiến trúc và patterns khi thay đổi
+00620: Soft delete không làm thay đổi Layered Architecture. AccountManagementService được bổ sung dependency đến SessionService.
+00621: AccountController        ↓AccountManagementService   ↙          ↓           ↘AccountRepository  PermissionService  SessionService        ↓Relational Database
+00622: 10.1. Facade Pattern
+00623: AccountManagementService tiếp tục đóng vai trò Facade. Khi soft delete, Facade kiểm tra quyền, tìm tài khoản, gọi domain operation, lưu thay đổi, thu hồi session và trả kết quả. Controller không cần biết chi tiết của Repository hoặc SessionService.
+00624: 10.2. State Pattern
+00625: State Pattern được mở rộng bằng DeletedState. Trạng thái này không cho phép đăng nhập, cập nhật, reset password, gán role hoặc xóa lần thứ hai. Quy tắc trạng thái được tập trung, tránh lặp lại điều kiện status == DELETED ở nhiều class.
+00626: 10.3. Repository Pattern và Audit Trail
+00627: Repository thay thao tác delete bằng update. Audit Trail lưu deletedBy, deletedAt và deleteReason để hỗ trợ truy vết.
+00628: // Trước thay đổiaccountRepository.delete(account);// Sau thay đổiaccount.softDelete(adminId, reason, currentTime);accountRepository.save(account);
+00629: 11. Thiết kế chi tiết những phần thay đổi
+00630: 11.1. Patterns
+00631: State Pattern: trước có Active, Inactive và Locked; sau thay đổi bổ sung Deleted.
+00632: Repository Pattern: trước có thể gọi delete; sau thay đổi cập nhật trạng thái và audit fields.
+00633: Facade Pattern: trước điều phối Account; sau thay đổi điều phối thêm SessionService.
+00634: Audit Trail: bổ sung deletedAt, deletedBy và deleteReason.
+00635: 11.2. Class và class operation
+00636: Operation loại 1 – System operation
+00637: Class: AccountManagementService.
+00638: DeleteAccountResult softDeleteAccount(    Long accountId,    Long adminId,    String reason);
+00639: Operation được xác định từ system event trong main sequence: Admin xác nhận Delete Account. Đây là operation thuộc Service/Control Layer.
+00640: accountId: ID tài khoản cần xóa.
+00641: adminId: ID Admin thực hiện thao tác.
+00642: reason: lý do xóa.
+00643: Kết quả trả về gồm accountId, trạng thái trước/sau, deletedAt và message.
+00644: Exception gồm AccountNotFound, AccountAlreadyDeleted, SelfDeletionNotAllowed, DeletionReasonRequired và UnauthorizedOperation.
+00645: Operation loại 2 – Domain/state-changing operation
+00646: Class: Account.
+00647: void softDelete(    Long deletedBy,    String reason,    LocalDateTime currentTime);
+00648: Operation được xác định từ Statechart và Business Rules. Operation thực hiện transition từ ACTIVE, INACTIVE hoặc LOCKED sang DELETED.
+00649: Operation được đặt trong Entity vì Account phải tự bảo vệ trạng thái, ngăn transition không hợp lệ và tránh phân tán business rule trong Controller hoặc Repository.
+00650: Thiết kế cũ deleteAccount(accountId) được thay bằng softDeleteAccount(accountId, adminId, reason) để bổ sung authorization và audit.
+00651: 11.3. Relational database và thay đổi table
+00652: Thiết kế trước thay đổi:
+00653: User(    user_id,    username,    password_hash,    email,    full_name,    status,    created_at)
+00654: Thiết kế sau thay đổi:
+00655: User(    user_id,    username,    password_hash,    email,    full_name,    status,    created_at,    updated_at,    deleted_at,    deleted_by,    delete_reason)
+00656: deleted_at: DATETIME NULL, lưu thời điểm soft delete.
+00657: deleted_by: BIGINT NULL, lưu ID Admin thực hiện.
+00658: delete_reason: VARCHAR(500) NULL, lưu lý do xóa.
+00659: updated_at: DATETIME, lưu thời điểm cập nhật cuối.
+00660: deleted_by có thể là foreign key tham chiếu User.user_id.
+00661: Câu lệnh cũ:
+00662: DELETE FROM usersWHERE user_id = ?;
+00663: Câu lệnh mới:
+00664: UPDATE usersSET status = 'DELETED',    deleted_at = CURRENT_TIMESTAMP,    deleted_by = ?,    delete_reason = ?,    updated_at = CURRENT_TIMESTAMPWHERE user_id = ?  AND status <> 'DELETED';
+00665: Query lấy danh sách mặc định:
+00666: SELECT *FROM usersWHERE status <> 'DELETED';
+00667: Đề xuất tạo index idx_user_status trên status và idx_user_deleted_at trên deleted_at.
+00668: 11.4. Pseudocode
+00669: Operation 1 – softDeleteAccount()
+00670: FUNCTION softDeleteAccount(accountId, adminId, reason)    IF adminId does not have MANAGE_ACCOUNT permission THEN        THROW UnauthorizedOperationException    END IF    IF accountId equals adminId THEN        THROW SelfDeletionNotAllowedException    END IF    IF reason is null OR reason is empty THEN        THROW DeletionReasonRequiredException    END IF    account ← accountRepository.findById(accountId)    IF account does not exist THEN        THROW AccountNotFoundException    END IF    IF account.status equals DELETED THEN        THROW AccountAlreadyDeletedException    END IF    previousStatus ← account.status    account.softDelete(adminId, reason, CURRENT_TIME)    BEGIN TRANSACTION        accountRepository.save(account)        sessionService.revokeAllSessions(accountId)    COMMIT TRANSACTION    RETURN DeleteAccountResult(        accountId,        previousStatus,        DELETED,        account.deletedAt,        "Account deleted successfully"    )END FUNCTION
+00671: Operation 2 – Account.softDelete()
+00672: FUNCTION softDelete(deletedBy, reason, currentTime)    IF current status equals DELETED THEN        THROW AccountAlreadyDeletedException    END IF    IF current status is not ACTIVE       AND current status is not INACTIVE       AND current status is not LOCKED THEN        THROW InvalidAccountStateException    END IF    IF reason is null OR reason is empty THEN        THROW DeletionReasonRequiredException    END IF    status ← DELETED    this.deletedBy ← deletedBy    this.deletedAt ← currentTime    this.deleteReason ← reason    this.updatedAt ← currentTimeEND FUNCTION
+00673: 12. Code
+00674: Mã dưới đây minh họa bằng Java/Spring. Tên package và class cần được đồng bộ với source code thực tế của project.
+00675: 12.1. Request DTO
+00676: public class DeleteAccountRequest {    private String reason;    public String getReason() {        return reason;    }}
+00677: 12.2. Controller
+00678: @RestController@RequestMapping("/api/accounts")public class AccountController {    private final AccountManagementService accountService;    @DeleteMapping("/{accountId}")    public ResponseEntity<DeleteAccountResult> deleteAccount(            @PathVariable Long accountId,            @RequestBody DeleteAccountRequest request,            @AuthenticationPrincipal CurrentUser currentUser) {        DeleteAccountResult result = accountService.softDeleteAccount(            accountId,            currentUser.getId(),            request.getReason()        );        return ResponseEntity.ok(result);    }}
+00679: 12.3. Service
+00680: @Transactionalpublic DeleteAccountResult softDeleteAccount(        Long accountId,        Long adminId,        String reason) {    permissionService.requirePermission(adminId, "MANAGE_ACCOUNT");    if (accountId.equals(adminId)) {        throw new SelfDeletionNotAllowedException();    }    if (reason == null || reason.isBlank()) {        throw new DeletionReasonRequiredException();    }    Account account = accountRepository.findById(accountId)        .orElseThrow(AccountNotFoundException::new);    AccountStatus previousStatus = account.getStatus();    account.softDelete(adminId, reason, LocalDateTime.now());    accountRepository.save(account);    sessionService.revokeAllSessions(accountId);    return DeleteAccountResult.of(account, previousStatus);}
+00681: 12.4. Entity
+00682: public void softDelete(        Long deletedBy,        String reason,        LocalDateTime currentTime) {    if (status == AccountStatus.DELETED) {        throw new AccountAlreadyDeletedException();    }    if (status != AccountStatus.ACTIVE            && status != AccountStatus.INACTIVE            && status != AccountStatus.LOCKED) {        throw new InvalidAccountStateException(status);    }    if (reason == null || reason.isBlank()) {        throw new DeletionReasonRequiredException();    }    this.status = AccountStatus.DELETED;    this.deletedBy = deletedBy;    this.deletedAt = currentTime;    this.deleteReason = reason;    this.updatedAt = currentTime;}
+00683: 12.5. Repository
+00684: public interface AccountRepository        extends JpaRepository<Account, Long> {    List<Account> findAllByStatusNot(AccountStatus status);}
+00685: 12.6. Exception response
+00686: {  "code": "ACCOUNT_ALREADY_DELETED",  "message": "Account already deleted"}
+00687: 12.7. Unit tests tối thiểu
+00688: shouldSoftDeleteActiveAccount: trạng thái chuyển thành DELETED và audit fields có dữ liệu.
+00689: shouldRejectDeletingDeletedAccount: xóa lần hai phát sinh AccountAlreadyDeletedException.
+00690: shouldRejectSelfDeletion: Admin không thể tự xóa.
+00691: shouldRequireDeletionReason: lý do rỗng bị từ chối.
+00692: shouldRevokeSessionsAfterDelete: session bị thu hồi sau khi transaction thành công.
+00693: 13. Rebuild và run project
+00694: Chỉ thực hiện rebuild trực tiếp khi tổng thời gian dự kiến dưới 3 phút. Nếu project dùng Maven:
+00695: ./mvnw clean test./mvnw spring-boot:run
+00696: 13.1. Demo main flow
+00697: Đăng nhập bằng Admin và mở Account Management.
+00698: Chọn một tài khoản ACTIVE và nhấn Delete.
+00699: Nhập lý do “Employee left the company” và xác nhận.
+00700: Kiểm tra thông báo “Account deleted successfully”.
+00701: Kiểm tra tài khoản biến mất khỏi danh sách mặc định.
+00702: Kiểm tra database: record vẫn tồn tại, status = DELETED và có deletedAt, deletedBy, deleteReason.
+00703: Thử đăng nhập bằng tài khoản đã xóa và xác nhận hệ thống từ chối.
+00704: 13.2. Demo alternative flow
+00705: Gửi lại yêu cầu xóa tài khoản đã có trạng thái DELETED. Hệ thống phải trả mã ACCOUNT_ALREADY_DELETED và không thay đổi database.
+00706: Kết quả mong đợi:
+00707: Soft delete tài khoản Active: Pass; trạng thái chuyển thành DELETED.
+00708: Record vẫn tồn tại trong database và có audit fields.
+00709: Tài khoản đã xóa không thể đăng nhập.
+00710: Xóa lại tài khoản Deleted bị từ chối.
+00711: Admin tự xóa chính mình bị từ chối.
+00712: Không nhập lý do bị từ chối.
+00713: V. Các thay đổi trong tài liệu
+00714: 14. Requirement Document
+00715: Requirement Document cần được bổ sung các nội dung sau:
+00716: Thay bước hard delete bằng soft delete.
+00717: Bổ sung yêu cầu nhập lý do xóa.
+00718: Bổ sung alternative flow Self-deletion.
+00719: Bổ sung alternative flow Account already deleted.
+00720: Bổ sung business rule cho trạng thái DELETED.
+00721: Bổ sung postcondition về việc giữ lại record và thu hồi session.
+00722: Cập nhật version và change log của UC17.
+00723: Change log:
+00724: Version 1.0: Delete Account sử dụng hard delete.
+00725: Version 1.1: Chuyển sang soft delete, bổ sung audit fields và thu hồi session.
+00726: 15. Architecture Document
+00727: Kiến trúc tổng thể không thay đổi. Architecture Document cần bổ sung:
+00728: SessionService trong Service/Infrastructure Layer.
+00729: Dependency từ AccountManagementService đến SessionService.
+00730: Quy định mọi thao tác xóa Account phải đi qua Service Layer.
+00731: Quy định Repository không hard delete Account.
+00732: Cơ chế lọc record có trạng thái DELETED khỏi danh sách mặc định.
+00733: Audit Trail cho các thao tác quản trị quan trọng.
+00734: Sơ đồ dependency sau thay đổi:
+00735: AccountController        ↓AccountManagementService   ↙          ↓           ↘AccountRepository  PermissionService  SessionService        ↓Relational Database
+00736: 16. Detail Design Document
+00737: Detail Design cần được bổ sung các phần sau:
+00738: Cập nhật Use Case Specification của UC17.
+00739: Cập nhật Communication Diagram của Delete Account.
+00740: Cập nhật Statechart với trạng thái DELETED.
+00741: Cập nhật Class Diagram với deletedAt, deletedBy, deleteReason và softDelete().
+00742: Bổ sung SessionService và operation revokeAllSessions().
+00743: Cập nhật operation của AccountManagementService.
+00744: Cập nhật relational database.
+00745: Cập nhật pseudocode.
+00746: Cập nhật danh sách exception.
+00747: Bổ sung unit test và integration test.
+00748: Traceability của các thay đổi:
+00749: Soft delete requirement → State DELETED → softDelete() → soft delete success test.
+00750: Lưu người xóa → deletedBy → Entity/migration → verify deletedBy test.
+00751: Lưu thời gian → deletedAt → Entity/migration → verify deletedAt test.
+00752: Bắt buộc lý do → deleteReason → validation → empty reason test.
+00753: Thu hồi session → SessionService → revokeAllSessions() → login rejected test.
+00754: Không tự xóa → alternative flow → service validation → self-delete test.
+00755: VI. Các nội dung khác
+00756: 1. Traceability tổng thể
+00757: Requirement: Soft delete account        ↓Analysis: Account, AccountManagementService, SessionService        ↓Design: softDeleteAccount(), Account.softDelete()        ↓Database: deleted_at, deleted_by, delete_reason        ↓Code: Controller, Service, Entity, Repository        ↓Test: Main flow và Alternative flow
+00758: 2. Lợi ích của thay đổi
+00759: Không làm mất dữ liệu lịch sử.
+00760: Không phá vỡ các foreign key đang tham chiếu tài khoản.
+00761: Có thể audit thao tác của Admin.
+00762: Có khả năng khôi phục tài khoản trong tương lai.
+00763: Tăng tính an toàn, khả năng bảo trì và truy vết.
+00764: 3. Hạn chế
+00765: Mọi query thông thường phải lọc trạng thái DELETED.
+00766: Database tiếp tục lưu record cũ và cần chính sách lưu trữ.
+00767: Cần quản lý quyền xem danh sách tài khoản đã xóa.
+00768: Cần xử lý unique username nếu khôi phục hoặc tạo lại tài khoản.
+00769: 4. Hướng mở rộng
+00770: Bổ sung Restore Account.
+00771: Bổ sung thời hạn lưu trữ trước khi xóa vĩnh viễn.
+00772: Bổ sung bảng Account_Audit_Log.
+00773: Gửi thông báo khi tài khoản bị xóa.
+00774: Lưu IP hoặc thiết bị của Admin thực hiện thao tác.

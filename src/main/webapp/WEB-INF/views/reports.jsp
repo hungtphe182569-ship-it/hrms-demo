@@ -8,11 +8,33 @@
     <div class="rule-note"><b>Dữ liệu trực tiếp</b><span>Tự động cập nhật sau mỗi thao tác</span></div>
 </section>
 
+<section class="toolbar report-actions">
+    <div><strong>Xuất báo cáo</strong><small>Dữ liệu mới nhất, không thay đổi hệ thống</small></div>
+    <span class="toolbar-spacer"></span>
+    <a class="button ghost" href="${pageContext.request.contextPath}/reports?format=xlsx">Xuất Excel (.xlsx)</a>
+    <a class="button primary" href="${pageContext.request.contextPath}/reports?format=pdf">Xuất PDF (.pdf)</a>
+</section>
+
 <section class="metric-grid">
     <article class="metric-card"><span class="metric-icon blue">Σ</span><div><small>Total accounts</small><strong>${stats.totalAccounts}</strong><p>Including soft-deleted records</p></div></article>
     <article class="metric-card"><span class="metric-icon green">✓</span><div><small>Active accounts</small><strong>${stats.activeAccounts}</strong><p>Available for system access</p></div></article>
     <article class="metric-card"><span class="metric-icon orange">!</span><div><small>Locked accounts</small><strong>${stats.lockedAccounts}</strong><p>Require Admin review</p></div></article>
     <article class="metric-card"><span class="metric-icon purple">R</span><div><small>System roles</small><strong>${stats.totalRoles}</strong><p>RBAC role definitions</p></div></article>
+</section>
+
+<section class="chart-grid report-secondary">
+    <article class="panel chart-panel">
+        <div class="panel-heading"><div><h2>Attendance statistics</h2><p>Thống kê chấm công theo trạng thái</p></div><span class="count-badge">${stats.attendanceRecords} records</span></div>
+        <c:choose><c:when test="${empty stats.attendanceByStatus}"><div class="empty-state">No report data found. Chạy <code>sql/04-admin-upgrade.sql</code> để bổ sung dữ liệu.</div></c:when><c:otherwise>
+            <div class="bar-chart" data-chart><c:forEach var="entry" items="${stats.attendanceByStatus}"><div class="bar-row"><span><c:out value="${entry.key}"/></span><div class="bar-track"><i data-value="${entry.value}"></i></div><strong>${entry.value}</strong></div></c:forEach></div>
+        </c:otherwise></c:choose>
+    </article>
+    <article class="panel chart-panel">
+        <div class="panel-heading"><div><h2>Permission statistics</h2><p>Số quyền được gán cho từng role</p></div><span class="count-badge">${stats.totalPermissions} permissions</span></div>
+        <c:choose><c:when test="${empty stats.permissionsByRole}"><div class="empty-state">No report data found. Chạy <code>sql/04-admin-upgrade.sql</code> để bổ sung RBAC.</div></c:when><c:otherwise>
+            <div class="bar-chart" data-chart><c:forEach var="entry" items="${stats.permissionsByRole}"><div class="bar-row"><span><c:out value="${entry.key}"/></span><div class="bar-track"><i data-value="${entry.value}"></i></div><strong>${entry.value}</strong></div></c:forEach></div>
+        </c:otherwise></c:choose>
+    </article>
 </section>
 
 <section class="chart-grid">

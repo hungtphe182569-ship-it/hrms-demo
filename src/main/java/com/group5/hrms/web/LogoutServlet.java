@@ -11,7 +11,10 @@ import java.io.IOException;
 public class LogoutServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        if (request.getSession(false) != null) request.getSession(false).invalidate();
+        if (request.getSession(false) != null) {
+            SessionRegistry.unregister(request.getSession(false));
+            request.getSession(false).invalidate();
+        }
         response.sendRedirect(request.getContextPath() + "/login?logout=1");
     }
 }

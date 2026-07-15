@@ -56,6 +56,21 @@
         });
     });
 
+    document.querySelectorAll('[data-edit-account]').forEach((button) => {
+        button.addEventListener('click', () => {
+            document.getElementById('editAccountId').value = button.dataset.editAccount;
+            document.getElementById('editAccountUsername').value = button.dataset.username || '';
+            document.getElementById('editAccountEmail').value = button.dataset.email || '';
+            document.getElementById('editAccountFullName').value = button.dataset.fullName || '';
+            document.getElementById('editAccountPhone').value = button.dataset.phone || '';
+            const selected = new Set((button.dataset.roleIds || '').split(','));
+            document.querySelectorAll('#editAccountRoles option').forEach(option => {
+                option.selected = selected.has(option.value);
+            });
+            openModal('editAccountModal');
+        });
+    });
+
     const bindSearch = (inputId, selector) => {
         const input = document.getElementById(inputId);
         if (!input) return;

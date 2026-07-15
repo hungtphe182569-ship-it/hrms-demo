@@ -38,6 +38,7 @@ public class LoginServlet extends HttpServlet {
             if (oldSession != null) oldSession.invalidate();
             HttpSession session = request.getSession(true);
             session.setAttribute("currentUser", account);
+            SessionRegistry.register(account.getId(), session);
             response.sendRedirect(request.getContextPath() + "/home");
         } catch (Exception e) {
             throw new ServletException("Không thể đăng nhập", e);

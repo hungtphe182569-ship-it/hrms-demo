@@ -143,6 +143,8 @@ input:focus, select:focus, textarea:focus { border-color: #78a0f5; box-shadow: 0
 textarea { min-height: 92px; resize: vertical; }
 .form-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 18px; }
 .form-actions.full { grid-column: 1 / -1; }
+.full { grid-column: 1 / -1; }
+select[multiple] { min-height: 110px; }
 .danger-mark { width: 42px; height: 42px; display: grid; place-items: center; margin-bottom: 13px; border-radius: 13px; color: white; background: var(--red); font-size: 22px; font-weight: 800; }
 
 .role-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
@@ -183,6 +185,10 @@ textarea { min-height: 92px; resize: vertical; }
 .role-stat-list span { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 11px; }.role-stat-list i { width: 7px; height: 7px; border-radius: 50%; background: var(--purple); }
 .insight-panel { display: flex; align-items: center; justify-content: space-between; gap: 25px; margin-top: 16px; padding: 24px 26px; }
 .insight-panel h2 { margin: 0 0 5px; font-size: 17px; }.insight-panel p:not(.eyebrow) { max-width: 720px; margin: 0; color: var(--muted); font-size: 11px; }
+.report-actions > div strong, .report-actions > div small { display: block; }
+.report-actions > div small { color: var(--muted); font-size: 10px; }
+.report-secondary { margin-top: 16px; }
+.empty-state { padding: 45px 25px; color: var(--muted); text-align: center; }
 
 [hidden] { display: none !important; }
 @keyframes modalIn { from { opacity: 0; transform: translateY(10px) scale(.98); } }

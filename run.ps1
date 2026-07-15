@@ -56,6 +56,15 @@ if (-not (Test-Path (Join-Path $baseDir "conf\server.xml"))) {
     Copy-Item (Join-Path $tomcatHome "conf\*") (Join-Path $baseDir "conf") -Recurse -Force
 }
 
+# The Windows installer disables Tomcat's shutdown port by default, which makes
+# a project-local instance impossible to stop cleanly. Enable it only in CATALINA_BASE.
+$serverXml = Join-Path $baseDir "conf\server.xml"
+$serverConfig = Get-Content $serverXml -Raw
+if ($serverConfig -match '<Server port="-1"') {
+    $serverConfig.Replace('<Server port="-1"', '<Server port="8005"') |
+        Set-Content $serverXml -Encoding UTF8
+}
+
 Copy-Item (Join-Path $projectDir "target\hrms-admin-demo.war") `
     (Join-Path $baseDir "webapps\hrms-admin-demo.war") -Force
 
