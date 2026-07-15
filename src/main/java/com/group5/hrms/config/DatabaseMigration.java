@@ -15,8 +15,13 @@ import java.sql.Statement;
 public class DatabaseMigration implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent event) {
-        try (InputStream input = getClass().getResourceAsStream("/db/04-admin-upgrade.sql")) {
-            if (input == null) throw new IllegalStateException("Missing database migration resource");
+        apply(event, "/db/04-admin-upgrade.sql", "Admin");
+        apply(event, "/db/05-hrm-manager.sql", "HR Manager");
+    }
+
+    private void apply(ServletContextEvent event, String resource, String label) {
+        try (InputStream input = getClass().getResourceAsStream(resource)) {
+            if (input == null) throw new IllegalStateException("Missing database migration resource: " + resource);
             String script = new String(input.readAllBytes(), StandardCharsets.UTF_8);
             try (Connection connection = Database.getConnection()) {
                 for (String batch : script.split("(?im)^\\s*GO\\s*$")) {
@@ -26,9 +31,9 @@ public class DatabaseMigration implements ServletContextListener {
                     }
                 }
             }
-            event.getServletContext().log("Admin database migration completed");
+            event.getServletContext().log(label + " database migration completed");
         } catch (IOException | SQLException e) {
-            throw new IllegalStateException("Cannot apply Admin database migration", e);
+            throw new IllegalStateException("Cannot apply " + label + " database migration", e);
         }
     }
 }
