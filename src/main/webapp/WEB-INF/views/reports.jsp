@@ -60,7 +60,7 @@
 </section>
 
 <section class="panel insight-panel">
-    <div><p class="eyebrow">DEMO TALKING POINT</p><h2>Data is recalculated after every Admin operation</h2><p>Hãy tạo hoặc soft delete một account ở UC17, sau đó quay lại trang này. Các COUNT và GROUP BY sẽ phản ánh dữ liệu mới trong SQL Server.</p></div>
+    <div><p class="eyebrow">DEMO TALKING POINT</p><h2>Data is recalculated after every Admin operation</h2><p>Hãy tạo hoặc soft delete một account ở UC17, sau đó quay lại trang này. Các COUNT và GROUP BY sẽ phản ánh dữ liệu mới trong MySQL.</p></div>
     <a class="button primary" href="${pageContext.request.contextPath}/accounts">Open account management →</a>
 </section>
 

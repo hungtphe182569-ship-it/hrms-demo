@@ -91,7 +91,9 @@ public class AuthenticationFilter implements Filter {
 
     private String requiredHrmPermission(String path) {
         if (path.startsWith("/hrm/analytics")) return "VIEW_HR_ANALYTICS";
+        if (path.startsWith("/hrm/reports")) return "VIEW_HR_REPORTS";
         if (path.startsWith("/hrm/activities")) return "VIEW_ACTIVITY_CENTER";
+        if (path.startsWith("/hrm/requests")) return "MANAGE_REQUEST";
         if (path.startsWith("/hrm/leaves")) return "APPROVE_LEAVE";
         if (path.startsWith("/hrm/payroll")) return "MANAGE_PAYROLL";
         if (path.startsWith("/hrm/departments")) return "MANAGE_DEPARTMENT";

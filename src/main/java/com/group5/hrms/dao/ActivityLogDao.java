@@ -14,7 +14,7 @@ import java.util.List;
 public class ActivityLogDao {
     public void log(Long actorUserId, String action, String entityType, Long entityId, String details) throws SQLException {
         String sql = """
-                INSERT INTO dbo.activity_logs(actor_user_id, action_name, entity_type, entity_id, details)
+                INSERT INTO activity_logs(actor_user_id, action_name, entity_type, entity_id, details)
                 VALUES (?, ?, ?, ?, ?)
                 """;
         try (Connection connection = Database.getConnection();
@@ -35,20 +35,20 @@ public class ActivityLogDao {
         String sql = """
                 SELECT a.activity_id, a.actor_user_id, u.full_name, a.action_name, a.entity_type,
                        a.entity_id, a.details, a.created_at
-                FROM dbo.activity_logs a
-                LEFT JOIN dbo.users u ON u.user_id = a.actor_user_id
+                FROM activity_logs a
+                LEFT JOIN users u ON u.user_id = a.actor_user_id
                 WHERE (? IS NULL OR a.action_name = ?)
                   AND (? IS NULL OR a.action_name LIKE ? OR a.details LIKE ?
-                       OR CAST(a.actor_user_id AS NVARCHAR(20)) LIKE ? OR u.full_name LIKE ?)
+                       OR CAST(a.actor_user_id AS CHAR) LIKE ? OR u.full_name LIKE ?)
                 ORDER BY a.created_at DESC
-                OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
+                LIMIT ? OFFSET ?
                 """;
         List<ActivityLog> logs = new ArrayList<>();
         try (Connection connection = Database.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             bindSearch(statement, keyword, actionName);
-            statement.setInt(8, offset);
-            statement.setInt(9, pageSize);
+            statement.setInt(8, pageSize);
+            statement.setInt(9, offset);
             try (ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) logs.add(map(rs));
             }
@@ -59,11 +59,11 @@ public class ActivityLogDao {
     public int count(String keyword, String actionName) throws SQLException {
         String sql = """
                 SELECT COUNT(*)
-                FROM dbo.activity_logs a
-                LEFT JOIN dbo.users u ON u.user_id = a.actor_user_id
+                FROM activity_logs a
+                LEFT JOIN users u ON u.user_id = a.actor_user_id
                 WHERE (? IS NULL OR a.action_name = ?)
                   AND (? IS NULL OR a.action_name LIKE ? OR a.details LIKE ?
-                       OR CAST(a.actor_user_id AS NVARCHAR(20)) LIKE ? OR u.full_name LIKE ?)
+                       OR CAST(a.actor_user_id AS CHAR) LIKE ? OR u.full_name LIKE ?)
                 """;
         try (Connection connection = Database.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {

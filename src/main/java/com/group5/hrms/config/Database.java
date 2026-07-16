@@ -3,37 +3,32 @@ package com.group5.hrms.config;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Locale;
 
 public final class Database {
 
-    // Local SQL Server Express — use host:port after TCP/IP is enabled.
-    // Override with HRMS_DB_URL / HRMS_DB_USER / HRMS_DB_PASSWORD if needed.
-    private static final String DEFAULT_URL = "jdbc:sqlserver://localhost:1433;"
-            + "databaseName=HRMS_Demo;encrypt=true;trustServerCertificate=true";
+    // Local MySQL 8.x. Override with HRMS_DB_URL / HRMS_DB_USER / HRMS_DB_PASSWORD if needed.
+    private static final String DEFAULT_URL = "jdbc:mysql://localhost:3306/HRMS_Demo"
+            + "?useUnicode=true&characterEncoding=utf8"
+            + "&serverTimezone=Asia/Ho_Chi_Minh&useSSL=false&allowPublicKeyRetrieval=true";
 
     private Database() {
     }
 
     static {
         try {
-            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+            Class.forName("com.mysql.cj.jdbc.Driver");
         } catch (ClassNotFoundException e) {
             throw new ExceptionInInitializerError(
-                    "Không tìm thấy SQL Server JDBC Driver: " + e.getMessage()
+                    "Khong tim thay MySQL JDBC Driver: " + e.getMessage()
             );
         }
     }
 
     public static Connection getConnection() throws SQLException {
-        String url = env("HRMS_DB_URL", DEFAULT_URL);
-        if (url.toLowerCase(Locale.ROOT).contains("integratedsecurity=true")) {
-            return DriverManager.getConnection(url);
-        }
         return DriverManager.getConnection(
-                url,
-                env("HRMS_DB_USER", "hrms_app"),
-                env("HRMS_DB_PASSWORD", "HrmsApp@123"));
+                env("HRMS_DB_URL", DEFAULT_URL),
+                env("HRMS_DB_USER", "root"),
+                env("HRMS_DB_PASSWORD", ""));
     }
 
     private static String env(String name, String fallback) {

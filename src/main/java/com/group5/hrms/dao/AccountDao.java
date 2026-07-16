@@ -21,9 +21,9 @@ public class AccountDao {
                 SELECT u.user_id, u.username, u.email, u.full_name, u.phone, u.status,
                        u.created_at, u.updated_at, u.deleted_at, u.deleted_by, u.delete_reason,
                        r.role_id, r.role_name, r.description
-                FROM dbo.users u
-                LEFT JOIN dbo.user_roles ur ON ur.user_id = u.user_id
-                LEFT JOIN dbo.roles r ON r.role_id = ur.role_id
+                FROM users u
+                LEFT JOIN user_roles ur ON ur.user_id = u.user_id
+                LEFT JOIN roles r ON r.role_id = ur.role_id
                 WHERE LOWER(u.username) = LOWER(?) AND u.password_hash = ? AND u.status = 'ACTIVE'
                 """;
         Account account = null;
@@ -53,9 +53,9 @@ public class AccountDao {
                 SELECT u.user_id, u.username, u.email, u.full_name, u.phone, u.status,
                        u.created_at, u.updated_at, u.deleted_at, u.deleted_by, u.delete_reason,
                        r.role_id, r.role_name, r.description
-                FROM dbo.users u
-                LEFT JOIN dbo.user_roles ur ON ur.user_id = u.user_id
-                LEFT JOIN dbo.roles r ON r.role_id = ur.role_id
+                FROM users u
+                LEFT JOIN user_roles ur ON ur.user_id = u.user_id
+                LEFT JOIN roles r ON r.role_id = ur.role_id
                 WHERE (? = 1 OR u.status <> 'DELETED')
                 ORDER BY u.created_at DESC, u.user_id DESC
                 """;
@@ -82,17 +82,17 @@ public class AccountDao {
     }
 
     public boolean existsUsername(String username) throws SQLException {
-        return exists("SELECT 1 FROM dbo.users WHERE username = ?", username);
+        return exists("SELECT 1 FROM users WHERE username = ?", username);
     }
 
     public boolean existsEmail(String email) throws SQLException {
-        return exists("SELECT 1 FROM dbo.users WHERE email = ?", email);
+        return exists("SELECT 1 FROM users WHERE email = ?", email);
     }
 
     public boolean existsEmailForOtherAccount(String email, long accountId) throws SQLException {
         try (Connection connection = Database.getConnection();
              PreparedStatement statement = connection.prepareStatement(
-                     "SELECT 1 FROM dbo.users WHERE email = ? AND user_id <> ?")) {
+                     "SELECT 1 FROM users WHERE email = ? AND user_id <> ?")) {
             statement.setString(1, email);
             statement.setLong(2, accountId);
             try (ResultSet rs = statement.executeQuery()) { return rs.next(); }
@@ -101,10 +101,10 @@ public class AccountDao {
 
     public long create(Account account, String passwordHash, long[] roleIds) throws SQLException {
         String insertAccount = """
-                INSERT INTO dbo.users(username, password_hash, email, full_name, phone, status)
+                INSERT INTO users(username, password_hash, email, full_name, phone, status)
                 VALUES (?, ?, ?, ?, ?, 'ACTIVE')
                 """;
-        String insertRole = "INSERT INTO dbo.user_roles(user_id, role_id) VALUES (?, ?)";
+        String insertRole = "INSERT INTO user_roles(user_id, role_id) VALUES (?, ?)";
         try (Connection connection = Database.getConnection()) {
             connection.setAutoCommit(false);
             try {
@@ -136,7 +136,7 @@ public class AccountDao {
 
     public void update(long accountId, Account account, long[] roleIds, long adminId) throws SQLException {
         String update = """
-                UPDATE dbo.users SET email = ?, full_name = ?, phone = ?, updated_at = SYSDATETIME()
+                UPDATE users SET email = ?, full_name = ?, phone = ?, updated_at = CURRENT_TIMESTAMP
                 WHERE user_id = ? AND status <> 'DELETED'
                 """;
         try (Connection connection = Database.getConnection()) {
@@ -150,12 +150,12 @@ public class AccountDao {
                     if (statement.executeUpdate() != 1) throw new IllegalArgumentException("Account not found or deleted");
                 }
                 try (PreparedStatement statement = connection.prepareStatement(
-                        "DELETE FROM dbo.user_roles WHERE user_id = ?")) {
+                        "DELETE FROM user_roles WHERE user_id = ?")) {
                     statement.setLong(1, accountId);
                     statement.executeUpdate();
                 }
                 replaceRoles(connection, accountId, roleIds,
-                        "INSERT INTO dbo.user_roles(user_id, role_id) VALUES (?, ?)");
+                        "INSERT INTO user_roles(user_id, role_id) VALUES (?, ?)");
                 audit(connection, accountId, "UPDATE", null, null, "Admin updated account", adminId);
                 connection.commit();
             } catch (SQLException | RuntimeException e) {
@@ -169,7 +169,7 @@ public class AccountDao {
 
     public void changeStatus(long accountId, String expectedStatus, String newStatus, long adminId) throws SQLException {
         String update = """
-                UPDATE dbo.users SET status = ?, updated_at = SYSDATETIME()
+                UPDATE users SET status = ?, updated_at = CURRENT_TIMESTAMP
                 WHERE user_id = ? AND status = ? AND status <> 'DELETED'
                 """;
         try (Connection connection = Database.getConnection()) {
@@ -194,15 +194,15 @@ public class AccountDao {
     }
 
     public void softDelete(long accountId, long adminId, String reason) throws SQLException {
-        String readStatus = "SELECT status FROM dbo.users WITH (UPDLOCK, ROWLOCK) WHERE user_id = ?";
+        String readStatus = "SELECT status FROM users WHERE user_id = ? FOR UPDATE";
         String update = """
-                UPDATE dbo.users
-                SET status = 'DELETED', deleted_at = SYSDATETIME(), deleted_by = ?,
-                    delete_reason = ?, updated_at = SYSDATETIME()
+                UPDATE users
+                SET status = 'DELETED', deleted_at = CURRENT_TIMESTAMP, deleted_by = ?,
+                    delete_reason = ?, updated_at = CURRENT_TIMESTAMP
                 WHERE user_id = ? AND status <> 'DELETED'
                 """;
         String audit = """
-                INSERT INTO dbo.account_audit_log(
+                INSERT INTO account_audit_log(
                     account_id, action_name, old_status, new_status, reason, performed_by)
                 VALUES (?, 'SOFT_DELETE', ?, 'DELETED', ?, ?)
                 """;
@@ -245,12 +245,12 @@ public class AccountDao {
 
     public void resetPassword(long accountId, String passwordHash, long adminId) throws SQLException {
         String update = """
-                UPDATE dbo.users SET password_hash = ?, updated_at = SYSDATETIME()
+                UPDATE users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP
                 WHERE user_id = ? AND status <> 'DELETED'
                 """;
         String audit = """
-                INSERT INTO dbo.account_audit_log(account_id, action_name, reason, performed_by)
-                VALUES (?, 'RESET_PASSWORD', N'Admin reset password', ?)
+                INSERT INTO account_audit_log(account_id, action_name, reason, performed_by)
+                VALUES (?, 'RESET_PASSWORD', 'Admin reset password', ?)
                 """;
         try (Connection connection = Database.getConnection()) {
             connection.setAutoCommit(false);
@@ -302,7 +302,7 @@ public class AccountDao {
     private void audit(Connection connection, long accountId, String action, String oldStatus,
                        String newStatus, String reason, long adminId) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement("""
-                INSERT INTO dbo.account_audit_log(
+                INSERT INTO account_audit_log(
                     account_id, action_name, old_status, new_status, reason, performed_by)
                 VALUES (?, ?, ?, ?, ?, ?)
                 """)) {

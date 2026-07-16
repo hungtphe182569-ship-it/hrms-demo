@@ -38,9 +38,9 @@
                 <button class="button primary" type="submit">Approve selected</button>
             </form>
             <div class="table-wrap"><table>
-                <thead><tr><th></th><th>Employee</th><th>Type</th><th>Period</th><th>Days</th><th>Reason</th><th class="right">Actions</th></tr></thead>
+                <thead><tr><th></th><th>Employee</th><th>Type</th><th>Period</th><th>Days</th><th>Balance</th><th>Warnings</th><th>Reason</th><th class="right">Actions</th></tr></thead>
                 <tbody>
-                <c:choose><c:when test="${empty leaves}"><tr><td colspan="7"><div class="empty-state">Không có đơn chờ duyệt.</div></td></tr></c:when>
+                <c:choose><c:when test="${empty leaves}"><tr><td colspan="9"><div class="empty-state">Không có đơn chờ duyệt.</div></td></tr></c:when>
                 <c:otherwise><c:forEach var="leave" items="${leaves}">
                     <tr>
                         <td><input form="bulkLeaveForm" type="checkbox" name="leaveIds" value="${leave.id}"></td>
@@ -49,12 +49,26 @@
                         <td><span class="role-pill">${leave.leaveType}</span></td>
                         <td><small>${leave.startDate} → ${leave.endDate}</small></td>
                         <td><strong>${leave.daysCount}</strong></td>
+                        <td><strong>${leave.leaveBalanceDays}</strong><small>days left</small></td>
+                        <td>
+                            <c:if test="${leave.insufficientBalance}"><span class="status locked"><i></i>Not enough balance</span></c:if>
+                            <c:if test="${leave.pastDateRange}"><span class="status locked"><i></i>Dates in the past</span></c:if>
+                            <c:if test="${!leave.insufficientBalance && !leave.pastDateRange}"><span class="status active"><i></i>OK</span></c:if>
+                        </td>
                         <td><c:out value="${leave.reason}"/></td>
                         <td class="right actions">
                             <form method="post" class="inline-form" data-confirm="Phê duyệt đơn này?">
                                 <input type="hidden" name="action" value="approve"><input type="hidden" name="leaveId" value="${leave.id}">
                                 <button class="icon-button" title="Approve">✓</button>
                             </form>
+                            <c:if test="${leave.insufficientBalance || leave.pastDateRange}">
+                                <form method="post" class="inline-form" data-confirm="Approve with HR override/continue?">
+                                    <input type="hidden" name="action" value="approve"><input type="hidden" name="leaveId" value="${leave.id}">
+                                    <input type="hidden" name="overrideBalance" value="${leave.insufficientBalance}">
+                                    <input type="hidden" name="allowPastDate" value="${leave.pastDateRange}">
+                                    <button class="button small danger-outline" type="submit">Override</button>
+                                </form>
+                            </c:if>
                             <button class="icon-button danger" type="button" title="Reject"
                                     data-open-modal="rejectLeaveModal" data-leave-id="${leave.id}"
                                     data-leave-name="${fn:escapeXml(leave.employeeName)}">×</button>

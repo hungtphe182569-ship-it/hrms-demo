@@ -1,5 +1,6 @@
 package com.group5.hrms.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -19,6 +20,7 @@ public class LeaveRequest {
     private LocalDateTime decidedAt;
     private String previousStatus;
     private LocalDateTime createdAt;
+    private BigDecimal leaveBalanceDays = BigDecimal.ZERO;
 
     public long getId() { return id; }
     public void setId(long id) { this.id = id; }
@@ -50,10 +52,21 @@ public class LeaveRequest {
     public void setPreviousStatus(String previousStatus) { this.previousStatus = previousStatus; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public BigDecimal getLeaveBalanceDays() { return leaveBalanceDays; }
+    public void setLeaveBalanceDays(BigDecimal leaveBalanceDays) { this.leaveBalanceDays = leaveBalanceDays; }
 
     public boolean canRevert() {
         return decidedAt != null
                 && ("APPROVED".equals(status) || "REJECTED".equals(status))
                 && decidedAt.isAfter(LocalDateTime.now().minusHours(24));
+    }
+
+    public boolean isInsufficientBalance() {
+        return leaveBalanceDays != null
+                && leaveBalanceDays.compareTo(BigDecimal.valueOf(daysCount)) < 0;
+    }
+
+    public boolean isPastDateRange() {
+        return endDate != null && endDate.isBefore(LocalDate.now());
     }
 }

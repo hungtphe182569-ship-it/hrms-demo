@@ -16,9 +16,9 @@ public class RoleDao {
         String sql = """
                 SELECT r.role_id, r.role_name, r.description, r.created_at,
                        COUNT(CASE WHEN u.status <> 'DELETED' THEN 1 END) AS assigned_users
-                FROM dbo.roles r
-                LEFT JOIN dbo.user_roles ur ON ur.role_id = r.role_id
-                LEFT JOIN dbo.users u ON u.user_id = ur.user_id
+                FROM roles r
+                LEFT JOIN user_roles ur ON ur.role_id = r.role_id
+                LEFT JOIN users u ON u.user_id = ur.user_id
                 GROUP BY r.role_id, r.role_name, r.description, r.created_at
                 ORDER BY r.role_name
                 """;
@@ -34,14 +34,14 @@ public class RoleDao {
     public boolean exists(long roleId) throws SQLException {
         try (Connection connection = Database.getConnection();
              PreparedStatement statement = connection.prepareStatement(
-                     "SELECT 1 FROM dbo.roles WHERE role_id = ?")) {
+                     "SELECT 1 FROM roles WHERE role_id = ?")) {
             statement.setLong(1, roleId);
             try (ResultSet rs = statement.executeQuery()) { return rs.next(); }
         }
     }
 
     public boolean existsName(String roleName, Long excludedId) throws SQLException {
-        String sql = "SELECT 1 FROM dbo.roles WHERE role_name = ? AND (? IS NULL OR role_id <> ?)";
+        String sql = "SELECT 1 FROM roles WHERE role_name = ? AND (? IS NULL OR role_id <> ?)";
         try (Connection connection = Database.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, roleName);
@@ -57,7 +57,7 @@ public class RoleDao {
     }
 
     public long create(String name, String description) throws SQLException {
-        String sql = "INSERT INTO dbo.roles(role_name, description) VALUES (?, ?)";
+        String sql = "INSERT INTO roles(role_name, description) VALUES (?, ?)";
         try (Connection connection = Database.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, name);
@@ -73,7 +73,7 @@ public class RoleDao {
     public void update(long roleId, String name, String description) throws SQLException {
         try (Connection connection = Database.getConnection();
              PreparedStatement statement = connection.prepareStatement(
-                     "UPDATE dbo.roles SET role_name = ?, description = ? WHERE role_id = ?")) {
+                     "UPDATE roles SET role_name = ?, description = ? WHERE role_id = ?")) {
             statement.setString(1, name);
             statement.setString(2, description);
             statement.setLong(3, roleId);
@@ -82,7 +82,7 @@ public class RoleDao {
     }
 
     public void delete(long roleId) throws SQLException {
-        String countSql = "SELECT COUNT(*) FROM dbo.user_roles WHERE role_id = ?";
+        String countSql = "SELECT COUNT(*) FROM user_roles WHERE role_id = ?";
         try (Connection connection = Database.getConnection()) {
             try (PreparedStatement statement = connection.prepareStatement(countSql)) {
                 statement.setLong(1, roleId);
@@ -92,7 +92,7 @@ public class RoleDao {
                 }
             }
             try (PreparedStatement statement = connection.prepareStatement(
-                    "DELETE FROM dbo.roles WHERE role_id = ?")) {
+                    "DELETE FROM roles WHERE role_id = ?")) {
                 statement.setLong(1, roleId);
                 if (statement.executeUpdate() != 1) throw new IllegalArgumentException("Role not found");
             }

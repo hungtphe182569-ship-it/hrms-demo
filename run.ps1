@@ -51,6 +51,81 @@ function Find-TomcatHome {
     return $null
 }
 
+function Get-ConfiguredDbEndpoint {
+    $url = $env:HRMS_DB_URL
+    if (-not $url) {
+        $url = "jdbc:mysql://localhost:3306/HRMS_Demo?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Ho_Chi_Minh&useSSL=false&allowPublicKeyRetrieval=true"
+    }
+
+    if ($url -notmatch '^jdbc:mysql://([^/?]+)') {
+        return $null
+    }
+
+    $serverPart = $Matches[1].Trim()
+    if (-not $serverPart -or $serverPart.Contains("\")) {
+        return $null
+    }
+
+    $serverHost = $serverPart
+    $serverPort = 3306
+    if ($serverPart -match '^\[([^\]]+)\]:(\d+)$') {
+        $serverHost = $Matches[1]
+        $serverPort = [int]$Matches[2]
+    } elseif ($serverPart -match '^([^:]+):(\d+)$') {
+        $serverHost = $Matches[1]
+        $serverPort = [int]$Matches[2]
+    }
+
+    [pscustomobject]@{
+        Host = $serverHost
+        Port = $serverPort
+    }
+}
+
+function Test-TcpPort {
+    param(
+        [string]$HostName,
+        [int]$Port,
+        [int]$TimeoutMs = 1500
+    )
+
+    $client = New-Object System.Net.Sockets.TcpClient
+    try {
+        $asyncResult = $client.BeginConnect($HostName, $Port, $null, $null)
+        if (-not $asyncResult.AsyncWaitHandle.WaitOne($TimeoutMs, $false)) {
+            return $false
+        }
+        $client.EndConnect($asyncResult)
+        return $true
+    } catch {
+        return $false
+    } finally {
+        $client.Dispose()
+    }
+}
+
+function Clear-StaleTomcatContexts {
+    param([string]$BaseDirectory)
+
+    $contextDir = Join-Path $BaseDirectory "conf\Catalina\localhost"
+    if (-not (Test-Path $contextDir)) {
+        return
+    }
+
+    $resolvedContextDir = (Resolve-Path $contextDir).Path
+    $resolvedBaseDir = (Resolve-Path $BaseDirectory).Path
+    $basePrefix = $resolvedBaseDir + [IO.Path]::DirectorySeparatorChar
+    if (-not $resolvedContextDir.StartsWith($basePrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw "Duong dan context Tomcat khong an toan: $resolvedContextDir"
+    }
+
+    $contextFiles = @(Get-ChildItem -LiteralPath $resolvedContextDir -Filter "*.xml" -File -ErrorAction SilentlyContinue)
+    if ($contextFiles.Count -gt 0) {
+        Write-Host "Removing stale Tomcat context descriptors from project runtime..." -ForegroundColor Yellow
+        $contextFiles | Remove-Item -Force
+    }
+}
+
 function Ensure-Tomcat {
     $existing = Find-TomcatHome
     if ($existing) { return $existing }
@@ -106,6 +181,17 @@ if ($Action -eq "stop") {
     exit $LASTEXITCODE
 }
 
+if (Test-Path $baseDir) {
+    Clear-StaleTomcatContexts -BaseDirectory $baseDir
+}
+
+$dbEndpoint = Get-ConfiguredDbEndpoint
+if ($dbEndpoint -and -not (Test-TcpPort -HostName $dbEndpoint.Host -Port $dbEndpoint.Port)) {
+    throw "Khong ket noi duoc MySQL tai $($dbEndpoint.Host):$($dbEndpoint.Port). Hay bat MySQL truoc khi chay app.`n" +
+          "Neu dung XAMPP/WAMP/MySQL Installer: start service MySQL, mac dinh port 3306.`n" +
+          "Neu DB cua ban khong nam o localhost:3306, set HRMS_DB_URL / HRMS_DB_USER / HRMS_DB_PASSWORD roi chay lai."
+}
+
 Write-Host "Building project..." -ForegroundColor Cyan
 & (Join-Path $projectDir "mvnw.cmd") clean package "-Dmaven.test.skip=true"
 if ($LASTEXITCODE -ne 0) {
@@ -128,6 +214,8 @@ if ($serverConfig -match '<Server port="-1"') {
     $serverConfig.Replace('<Server port="-1"', '<Server port="8005"') |
         Set-Content $serverXml -Encoding UTF8
 }
+
+Clear-StaleTomcatContexts -BaseDirectory $baseDir
 
 # A normal `run.ps1` is also a safe restart. This avoids launching a second
 # Tomcat while an older project instance still owns port 8080.
@@ -179,7 +267,7 @@ for ($attempt = 0; $attempt -lt 30; $attempt++) {
 }
 
 throw "Tomcat da khoi dong nhung app chua phan hoi. Kiem tra .runtime\tomcat-base\logs.`n" +
-      "Thuong gap: SQL Express chua bat TCP/IP. Mo 'SQL Server Configuration Manager' (Run as Admin) ->`n" +
-      "SQL Server Network Configuration -> Protocols for SQLEXPRESS -> TCP/IP = Enabled, roi Restart service SQLEXPRESS.`n" +
-      "DB login mac dinh: hrms_app / HrmsApp@123 (hoac set HRMS_DB_URL / HRMS_DB_USER / HRMS_DB_PASSWORD)."
+      "Thuong gap: chua tao database HRMS_Demo hoac sai MySQL user/password.`n" +
+      "Chay sql/01-schema.sql va sql/02-seed.sql trong MySQL Workbench truoc.`n" +
+      "DB login mac dinh: root / mat khau trong HRMS_DB_PASSWORD neu MySQL cua ban co password."
 

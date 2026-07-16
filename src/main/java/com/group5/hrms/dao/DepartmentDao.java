@@ -17,9 +17,9 @@ public class DepartmentDao {
         String sql = """
                 SELECT d.department_id, d.department_code, d.department_name, d.status,
                        d.created_at, d.updated_at,
-                       (SELECT COUNT(*) FROM dbo.employees e
+                       (SELECT COUNT(*) FROM employees e
                         WHERE e.department_id = d.department_id AND e.status = 'ACTIVE') AS employee_count
-                FROM dbo.departments d
+                FROM departments d
                 WHERE (? = 1 OR d.status = 'ACTIVE')
                 ORDER BY d.department_name
                 """;
@@ -38,9 +38,9 @@ public class DepartmentDao {
         String sql = """
                 SELECT d.department_id, d.department_code, d.department_name, d.status,
                        d.created_at, d.updated_at,
-                       (SELECT COUNT(*) FROM dbo.employees e
+                       (SELECT COUNT(*) FROM employees e
                         WHERE e.department_id = d.department_id AND e.status = 'ACTIVE') AS employee_count
-                FROM dbo.departments d
+                FROM departments d
                 WHERE d.department_id = ?
                 """;
         try (Connection connection = Database.getConnection();
@@ -55,7 +55,7 @@ public class DepartmentDao {
 
     public boolean existsCodeOrName(String code, String name, Long excludeId) throws SQLException {
         String sql = """
-                SELECT COUNT(*) FROM dbo.departments
+                SELECT COUNT(*) FROM departments
                 WHERE (LOWER(department_code) = LOWER(?) OR LOWER(department_name) = LOWER(?))
                   AND (? IS NULL OR department_id <> ?)
                 """;
@@ -78,7 +78,7 @@ public class DepartmentDao {
     }
 
     public long create(String code, String name) throws SQLException {
-        String sql = "INSERT INTO dbo.departments(department_code, department_name) VALUES (?, ?)";
+        String sql = "INSERT INTO departments(department_code, department_name) VALUES (?, ?)";
         try (Connection connection = Database.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, code.trim());
@@ -93,8 +93,8 @@ public class DepartmentDao {
 
     public void update(long id, String code, String name) throws SQLException {
         String sql = """
-                UPDATE dbo.departments
-                SET department_code = ?, department_name = ?, updated_at = SYSDATETIME()
+                UPDATE departments
+                SET department_code = ?, department_name = ?, updated_at = CURRENT_TIMESTAMP
                 WHERE department_id = ? AND status = 'ACTIVE'
                 """;
         try (Connection connection = Database.getConnection();
@@ -110,8 +110,8 @@ public class DepartmentDao {
 
     public void softDelete(long id) throws SQLException {
         String sql = """
-                UPDATE dbo.departments
-                SET status = 'INACTIVE', updated_at = SYSDATETIME()
+                UPDATE departments
+                SET status = 'INACTIVE', updated_at = CURRENT_TIMESTAMP
                 WHERE department_id = ? AND status = 'ACTIVE'
                 """;
         try (Connection connection = Database.getConnection();

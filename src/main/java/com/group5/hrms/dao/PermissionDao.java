@@ -13,9 +13,9 @@ public class PermissionDao {
             if (!tableExists(connection, "role_permissions")) return false;
             try (PreparedStatement statement = connection.prepareStatement("""
                     SELECT 1
-                    FROM dbo.user_roles ur
-                    JOIN dbo.role_permissions rp ON rp.role_id = ur.role_id
-                    JOIN dbo.permissions p ON p.permission_id = rp.permission_id
+                    FROM user_roles ur
+                    JOIN role_permissions rp ON rp.role_id = ur.role_id
+                    JOIN permissions p ON p.permission_id = rp.permission_id
                     WHERE ur.user_id = ? AND p.permission_code = ?
                     """)) {
                 statement.setLong(1, accountId);
@@ -27,7 +27,7 @@ public class PermissionDao {
 
     private boolean tableExists(Connection connection, String tableName) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(
-                "SELECT 1 FROM sys.tables WHERE name = ?")) {
+                "SELECT 1 FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ?")) {
             statement.setString(1, tableName);
             try (ResultSet rs = statement.executeQuery()) { return rs.next(); }
         }

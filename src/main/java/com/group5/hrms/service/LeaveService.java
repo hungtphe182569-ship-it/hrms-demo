@@ -14,7 +14,7 @@ public class LeaveService {
     private final NotificationDao notificationDao = new NotificationDao();
 
     public List<LeaveRequest> findPending(String leaveType) throws SQLException {
-        return leaveRequestDao.findByStatus("PENDING_HRM", leaveType);
+        return leaveRequestDao.findPending(leaveType);
     }
 
     public List<LeaveRequest> findProcessed(String leaveType) throws SQLException {
@@ -29,11 +29,22 @@ public class LeaveService {
     }
 
     public void approve(long leaveId, long hrmId) throws SQLException {
-        leaveRequestDao.decide(leaveId, "APPROVED", null, hrmId);
+        leaveRequestDao.approve(leaveId, hrmId, false, false);
         long employeeUserId = leaveRequestDao.findUserIdByLeave(leaveId);
         notificationDao.notifyUser(employeeUserId, "Leave approved",
                 "Đơn nghỉ #" + leaveId + " đã được HR Manager phê duyệt.");
         activityLogDao.log(hrmId, "APPROVE_LEAVE", "LEAVE", leaveId, "Approved leave #" + leaveId);
+    }
+
+    public void approve(long leaveId, long hrmId, boolean overrideBalance, boolean allowPastDate)
+            throws SQLException {
+        leaveRequestDao.approve(leaveId, hrmId, overrideBalance, allowPastDate);
+        long employeeUserId = leaveRequestDao.findUserIdByLeave(leaveId);
+        notificationDao.notifyUser(employeeUserId, "Leave approved",
+                "Leave request #" + leaveId + " has been approved by HR Manager.");
+        activityLogDao.log(hrmId, "APPROVE_LEAVE", "LEAVE", leaveId,
+                "Approved leave #" + leaveId + ";overrideBalance=" + overrideBalance
+                        + ";allowPastDate=" + allowPastDate);
     }
 
     public void reject(long leaveId, long hrmId, String reason) throws SQLException {

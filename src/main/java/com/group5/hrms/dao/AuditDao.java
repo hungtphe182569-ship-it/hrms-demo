@@ -13,12 +13,13 @@ import java.util.List;
 public class AuditDao {
     public List<AuditEntry> findRecent(int limit) throws SQLException {
         String sql = """
-                SELECT TOP (?) a.audit_id, a.action_name, a.reason, a.performed_at,
+                SELECT a.audit_id, a.action_name, a.reason, a.performed_at,
                        target.username AS account_name, actor.username AS performed_by
-                FROM dbo.account_audit_log a
-                JOIN dbo.users target ON target.user_id = a.account_id
-                JOIN dbo.users actor ON actor.user_id = a.performed_by
+                FROM account_audit_log a
+                JOIN users target ON target.user_id = a.account_id
+                JOIN users actor ON actor.user_id = a.performed_by
                 ORDER BY a.performed_at DESC, a.audit_id DESC
+                LIMIT ?
                 """;
         List<AuditEntry> entries = new ArrayList<>();
         try (Connection connection = Database.getConnection();

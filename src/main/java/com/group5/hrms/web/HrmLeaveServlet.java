@@ -42,7 +42,9 @@ public class HrmLeaveServlet extends HttpServlet {
         String redirect = request.getContextPath() + "/hrm/leaves";
         try {
             if ("approve".equals(action)) {
-                leaveService.approve(id(request), hrm.getId());
+                leaveService.approve(id(request), hrm.getId(),
+                        "true".equals(request.getParameter("overrideBalance")),
+                        "true".equals(request.getParameter("allowPastDate")));
                 Flash.success(request, "Đã phê duyệt đơn nghỉ phép");
             } else if ("approveBulk".equals(action)) {
                 leaveService.approveMany(ids(request), hrm.getId());

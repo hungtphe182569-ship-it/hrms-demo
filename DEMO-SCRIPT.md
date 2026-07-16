@@ -1,43 +1,78 @@
-# Kịch bản demo 3 chức năng Admin
+# Demo Script
 
-## Chuẩn bị
+## Chuan Bi
 
-1. Chạy `sql/01-schema.sql` và `sql/02-seed.sql`.
-2. Cấu hình ba biến môi trường kết nối SQL Server.
-3. Chạy `mvnw.cmd clean package`.
-4. Copy WAR vào Tomcat 10.1 và mở `/hrms-admin-demo/`.
+1. Start MySQL service.
+2. Chay `sql/01-schema.sql` va `sql/02-seed.sql` trong MySQL Workbench/phpMyAdmin.
+3. Neu MySQL co password, set:
 
-## 1. Manage Account – khoảng 90 giây
+```powershell
+$env:HRMS_DB_USER="root"
+$env:HRMS_DB_PASSWORD="mat_khau_mysql_cua_ban"
+```
 
-### Main flow
+4. Chay:
 
-1. Chọn **Create account**.
-2. Nhập username mới, email, password và role.
-3. Nhấn **Create account**.
-4. Chỉ ra record mới trong danh sách.
+```powershell
+.\run.ps1
+```
 
-### Alternative flow
+5. Mo `http://localhost:8080/hrms-admin-demo/`.
 
-1. Tạo lại đúng username vừa dùng.
-2. Hệ thống trả **Username already exists** và không ghi thêm record.
+## Tai Khoan Demo
 
-### Thay đổi TT4 – soft delete
+```text
+admin / Admin@123
+manager01 / Manager@123
+employee01 / Employee@123
+hrm01 / Hrm@123
+```
 
-1. Chọn nút xóa của một tài khoản Employee.
-2. Nhập lý do và xác nhận.
-3. Bật **Hiện tài khoản đã xóa** để thấy record vẫn còn với status DELETED.
-4. Mở SQL Server và chỉ ra deleted_at, deleted_by, delete_reason.
+## 1. Manage Account - khoang 90 giay
 
-## 2. Manage Roles – khoảng 45 giây
+1. Chon **Create account**.
+2. Nhap username moi, email, password va role.
+3. Nhan **Create account**.
+4. Tao lai dung username vua dung de thay loi **Username already exists**.
+5. Xoa mem mot account Employee, nhap ly do.
+6. Bat **Hien tai khoan da xoa** de thay status `DELETED`.
+7. Mo MySQL va kiem tra `deleted_at`, `deleted_by`, `delete_reason`.
 
-1. Tạo role `Recruiter`.
-2. Cập nhật description của role.
-3. Xóa role Recruiter khi chưa được gán: thành công.
-4. Thử xóa role Employee đang được sử dụng: hệ thống từ chối.
+## 2. Manage Roles - khoang 45 giay
 
-## 3. Reports & Statistics – khoảng 30 giây
+1. Tao role `Recruiter`.
+2. Cap nhat description cua role.
+3. Xoa role `Recruiter` khi chua duoc gan: thanh cong.
+4. Thu xoa role `Employee` dang duoc su dung: he thong tu choi.
 
-1. Mở trang Reports & Statistics.
-2. Chỉ ra tổng account, Active, Locked và số role.
-3. Giải thích số liệu được lấy bằng COUNT/GROUP BY từ SQL Server.
-4. Sau khi soft delete, tải lại trang để thấy số liệu thay đổi.
+## 3. Reports & Statistics - khoang 30 giay
+
+1. Mo trang Reports & Statistics.
+2. Chi ra tong account, Active, Locked va so role.
+3. Giai thich so lieu lay bang `COUNT/GROUP BY` tu MySQL.
+4. Sau khi soft delete, tai lai trang de thay so lieu thay doi.
+
+## 4. UC9 - View Reports Dashboard
+
+1. Dang nhap `hrm01 / Hrm@123`.
+2. Mo **HR Manager -> Reports**.
+3. Chon report type, department/date filter.
+4. Nhan View de xem chart/table.
+5. Xuat Excel/PDF.
+6. Mo MySQL kiem tra cache `HR_REPORT` va log `AUDIT_LOG`.
+
+## 5. UC10 - Leave Approval
+
+1. Dang nhap `hrm01 / Hrm@123`.
+2. Mo **HR Manager -> Leaves**.
+3. Duyet request hop le.
+4. Thu request vuot balance/past date de thay warning.
+5. Dung override khi can.
+6. Revert trong cua so 24 gio.
+
+## 6. UC11 - Request Management
+
+1. Mo **HR Manager -> Requests**.
+2. Approve salary/transfer request.
+3. Reject mot request kem ly do.
+4. Approve promotion de thay status chuyen sang `PENDING_ADMIN`.

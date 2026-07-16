@@ -17,30 +17,30 @@ public class ReportDao {
             loadTotals(connection, stats);
             stats.setAccountsByStatus(loadMap(connection, """
                     SELECT status AS label, COUNT(*) AS total
-                    FROM dbo.users GROUP BY status ORDER BY status
+                    FROM users GROUP BY status ORDER BY status
                     """));
             stats.setAccountsByRole(loadMap(connection, """
                     SELECT r.role_name AS label, COUNT(u.user_id) AS total
-                    FROM dbo.roles r
-                    LEFT JOIN dbo.user_roles ur ON ur.role_id = r.role_id
-                    LEFT JOIN dbo.users u ON u.user_id = ur.user_id AND u.status <> 'DELETED'
+                    FROM roles r
+                    LEFT JOIN user_roles ur ON ur.role_id = r.role_id
+                    LEFT JOIN users u ON u.user_id = ur.user_id AND u.status <> 'DELETED'
                     GROUP BY r.role_name ORDER BY r.role_name
                     """));
             if (tableExists(connection, "permissions") && tableExists(connection, "role_permissions")) {
                 stats.setPermissionsByRole(loadMap(connection, """
                         SELECT r.role_name AS label, COUNT(rp.permission_id) AS total
-                        FROM dbo.roles r
-                        LEFT JOIN dbo.role_permissions rp ON rp.role_id = r.role_id
+                        FROM roles r
+                        LEFT JOIN role_permissions rp ON rp.role_id = r.role_id
                         GROUP BY r.role_name ORDER BY r.role_name
                         """));
-                stats.setTotalPermissions(loadCount(connection, "SELECT COUNT(*) FROM dbo.permissions"));
+                stats.setTotalPermissions(loadCount(connection, "SELECT COUNT(*) FROM permissions"));
             }
             if (tableExists(connection, "attendance")) {
                 stats.setAttendanceByStatus(loadMap(connection, """
                         SELECT status AS label, COUNT(*) AS total
-                        FROM dbo.attendance GROUP BY status ORDER BY status
+                        FROM attendance GROUP BY status ORDER BY status
                         """));
-                stats.setAttendanceRecords(loadCount(connection, "SELECT COUNT(*) FROM dbo.attendance"));
+                stats.setAttendanceRecords(loadCount(connection, "SELECT COUNT(*) FROM attendance"));
             }
         }
         return stats;
@@ -53,8 +53,8 @@ public class ReportDao {
                     SUM(CASE WHEN status = 'ACTIVE' THEN 1 ELSE 0 END) AS active_accounts,
                     SUM(CASE WHEN status = 'LOCKED' THEN 1 ELSE 0 END) AS locked_accounts,
                     SUM(CASE WHEN status = 'DELETED' THEN 1 ELSE 0 END) AS deleted_accounts,
-                    (SELECT COUNT(*) FROM dbo.roles) AS total_roles
-                FROM dbo.users
+                    (SELECT COUNT(*) FROM roles) AS total_roles
+                FROM users
                 """;
         try (PreparedStatement statement = connection.prepareStatement(sql);
              ResultSet rs = statement.executeQuery()) {
@@ -85,7 +85,7 @@ public class ReportDao {
 
     private boolean tableExists(Connection connection, String tableName) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(
-                "SELECT 1 FROM sys.tables WHERE name = ?")) {
+                "SELECT 1 FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ?")) {
             statement.setString(1, tableName);
             try (ResultSet rs = statement.executeQuery()) { return rs.next(); }
         }

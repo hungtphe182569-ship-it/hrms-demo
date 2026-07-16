@@ -32,11 +32,11 @@
     </article>
 
     <div class="dashboard-side">
-        <article class="panel"><div class="panel-heading"><div><h2>Phân bố trạng thái</h2><p>Dữ liệu từ SQL Server</p></div><span class="status active"><i></i>Live</span></div>
+        <article class="panel"><div class="panel-heading"><div><h2>Phân bố trạng thái</h2><p>Dữ liệu từ MySQL</p></div><span class="status active"><i></i>Live</span></div>
             <div class="compact-stats"><c:forEach var="entry" items="${stats.accountsByStatus}"><div><span><i class="status-dot ${entry.key.toLowerCase()}"></i><c:out value="${entry.key}"/></span><strong>${entry.value}</strong></div></c:forEach></div>
         </article>
         <article class="panel system-health"><div class="panel-heading"><div><h2>Trạng thái hệ thống</h2><p>Kiểm tra nhanh</p></div><span class="count-badge online">Hoạt động</span></div>
-            <div class="system-list"><div><span>SQL Server</span><strong><i></i>Đã kết nối</strong></div><div><span>RBAC</span><strong><i></i>${stats.totalPermissions} permissions</strong></div><div><span>Phiên hiện tại</span><strong><i></i>${sessionScope.currentUser.status}</strong></div></div>
+            <div class="system-list"><div><span>MySQL</span><strong><i></i>Đã kết nối</strong></div><div><span>RBAC</span><strong><i></i>${stats.totalPermissions} permissions</strong></div><div><span>Phiên hiện tại</span><strong><i></i>${sessionScope.currentUser.status}</strong></div></div>
         </article>
     </div>
 </section>

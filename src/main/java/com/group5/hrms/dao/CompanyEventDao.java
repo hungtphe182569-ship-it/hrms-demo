@@ -18,7 +18,7 @@ public class CompanyEventDao {
     public List<CompanyEvent> findAll() throws SQLException {
         String sql = """
                 SELECT event_id, title, event_type, start_at, end_at, description, created_by, created_at
-                FROM dbo.company_events
+                FROM company_events
                 ORDER BY start_at
                 """;
         List<CompanyEvent> events = new ArrayList<>();
@@ -32,10 +32,11 @@ public class CompanyEventDao {
 
     public List<CompanyEvent> upcoming(int limit) throws SQLException {
         String sql = """
-                SELECT TOP (?) event_id, title, event_type, start_at, end_at, description, created_by, created_at
-                FROM dbo.company_events
-                WHERE end_at >= SYSDATETIME()
+                SELECT event_id, title, event_type, start_at, end_at, description, created_by, created_at
+                FROM company_events
+                WHERE end_at >= CURRENT_TIMESTAMP
                 ORDER BY start_at
+                LIMIT ?
                 """;
         List<CompanyEvent> events = new ArrayList<>();
         try (Connection connection = Database.getConnection();
@@ -51,7 +52,7 @@ public class CompanyEventDao {
     public Optional<CompanyEvent> findById(long id) throws SQLException {
         String sql = """
                 SELECT event_id, title, event_type, start_at, end_at, description, created_by, created_at
-                FROM dbo.company_events WHERE event_id = ?
+                FROM company_events WHERE event_id = ?
                 """;
         try (Connection connection = Database.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -66,7 +67,7 @@ public class CompanyEventDao {
     public long create(String title, String type, LocalDateTime start, LocalDateTime end, String description, long createdBy)
             throws SQLException {
         String sql = """
-                INSERT INTO dbo.company_events(title, event_type, start_at, end_at, description, created_by)
+                INSERT INTO company_events(title, event_type, start_at, end_at, description, created_by)
                 VALUES (?, ?, ?, ?, ?, ?)
                 """;
         try (Connection connection = Database.getConnection();
@@ -88,8 +89,8 @@ public class CompanyEventDao {
     public void update(long id, String title, String type, LocalDateTime start, LocalDateTime end, String description)
             throws SQLException {
         String sql = """
-                UPDATE dbo.company_events
-                SET title = ?, event_type = ?, start_at = ?, end_at = ?, description = ?, updated_at = SYSDATETIME()
+                UPDATE company_events
+                SET title = ?, event_type = ?, start_at = ?, end_at = ?, description = ?, updated_at = CURRENT_TIMESTAMP
                 WHERE event_id = ?
                 """;
         try (Connection connection = Database.getConnection();
@@ -105,7 +106,7 @@ public class CompanyEventDao {
     }
 
     public void delete(long id) throws SQLException {
-        String sql = "DELETE FROM dbo.company_events WHERE event_id = ?";
+        String sql = "DELETE FROM company_events WHERE event_id = ?";
         try (Connection connection = Database.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setLong(1, id);

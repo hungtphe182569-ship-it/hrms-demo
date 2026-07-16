@@ -15,7 +15,7 @@ import java.util.Map;
 public class HrmStatsDao {
     public int countActiveEmployees(Long departmentId) throws SQLException {
         String sql = """
-                SELECT COUNT(*) FROM dbo.employees e
+                SELECT COUNT(*) FROM employees e
                 WHERE e.status = 'ACTIVE'
                   AND (? IS NULL OR e.department_id = ?)
                 """;
@@ -31,12 +31,12 @@ public class HrmStatsDao {
 
     public Map<String, Integer> employeesByDepartment(Long departmentId) throws SQLException {
         String sql = """
-                SELECT COALESCE(d.department_name, N'Unassigned') AS dept_name, COUNT(*) AS cnt
-                FROM dbo.employees e
-                LEFT JOIN dbo.departments d ON d.department_id = e.department_id
+                SELECT COALESCE(d.department_name, 'Unassigned') AS dept_name, COUNT(*) AS cnt
+                FROM employees e
+                LEFT JOIN departments d ON d.department_id = e.department_id
                 WHERE e.status = 'ACTIVE'
                   AND (? IS NULL OR e.department_id = ?)
-                GROUP BY COALESCE(d.department_name, N'Unassigned')
+                GROUP BY COALESCE(d.department_name, 'Unassigned')
                 ORDER BY cnt DESC
                 """;
         return intMap(sql, departmentId);
@@ -45,7 +45,7 @@ public class HrmStatsDao {
     public Map<String, Integer> genderBreakdown(Long departmentId) throws SQLException {
         String sql = """
                 SELECT COALESCE(e.gender, 'OTHER') AS gender_name, COUNT(*) AS cnt
-                FROM dbo.employees e
+                FROM employees e
                 WHERE e.status = 'ACTIVE'
                   AND (? IS NULL OR e.department_id = ?)
                 GROUP BY COALESCE(e.gender, 'OTHER')
@@ -56,12 +56,12 @@ public class HrmStatsDao {
 
     public Map<String, BigDecimal> salaryByDepartment(Long departmentId) throws SQLException {
         String sql = """
-                SELECT COALESCE(d.department_name, N'Unassigned') AS dept_name, SUM(e.base_salary) AS total_salary
-                FROM dbo.employees e
-                LEFT JOIN dbo.departments d ON d.department_id = e.department_id
+                SELECT COALESCE(d.department_name, 'Unassigned') AS dept_name, SUM(e.base_salary) AS total_salary
+                FROM employees e
+                LEFT JOIN departments d ON d.department_id = e.department_id
                 WHERE e.status = 'ACTIVE'
                   AND (? IS NULL OR e.department_id = ?)
-                GROUP BY COALESCE(d.department_name, N'Unassigned')
+                GROUP BY COALESCE(d.department_name, 'Unassigned')
                 ORDER BY total_salary DESC
                 """;
         Map<String, BigDecimal> map = new LinkedHashMap<>();
@@ -83,7 +83,7 @@ public class HrmStatsDao {
                          ELSE '70-100%'
                        END AS bucket,
                        COUNT(*) AS cnt
-                FROM dbo.employees e
+                FROM employees e
                 WHERE e.status = 'ACTIVE'
                   AND (? IS NULL OR e.department_id = ?)
                 GROUP BY CASE

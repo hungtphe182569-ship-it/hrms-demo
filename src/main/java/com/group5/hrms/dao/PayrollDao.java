@@ -18,7 +18,7 @@ public class PayrollDao {
         String sql = """
                 SELECT batch_id, period_label, period_start, period_end, status, total_amount,
                        employee_count, locked, rejection_reason, approved_by, approved_at, created_at
-                FROM dbo.payroll_batches
+                FROM payroll_batches
                 ORDER BY period_start DESC, batch_id DESC
                 """;
         List<PayrollBatch> batches = new ArrayList<>();
@@ -34,7 +34,7 @@ public class PayrollDao {
         String sql = """
                 SELECT batch_id, period_label, period_start, period_end, status, total_amount,
                        employee_count, locked, rejection_reason, approved_by, approved_at, created_at
-                FROM dbo.payroll_batches WHERE batch_id = ?
+                FROM payroll_batches WHERE batch_id = ?
                 """;
         try (Connection connection = Database.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -50,10 +50,10 @@ public class PayrollDao {
         String sql = """
                 SELECT p.payslip_id, p.batch_id, p.employee_id, u.full_name, d.department_name,
                        p.gross_pay, p.net_pay, p.bank_account, p.published
-                FROM dbo.payslips p
-                JOIN dbo.employees e ON e.employee_id = p.employee_id
-                JOIN dbo.users u ON u.user_id = e.user_id
-                LEFT JOIN dbo.departments d ON d.department_id = e.department_id
+                FROM payslips p
+                JOIN employees e ON e.employee_id = p.employee_id
+                JOIN users u ON u.user_id = e.user_id
+                LEFT JOIN departments d ON d.department_id = e.department_id
                 WHERE p.batch_id = ?
                 ORDER BY u.full_name
                 """;
@@ -81,7 +81,7 @@ public class PayrollDao {
     }
 
     public int countSubmitted() throws SQLException {
-        String sql = "SELECT COUNT(*) FROM dbo.payroll_batches WHERE status = 'SUBMITTED'";
+        String sql = "SELECT COUNT(*) FROM payroll_batches WHERE status = 'SUBMITTED'";
         try (Connection connection = Database.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql);
              ResultSet rs = statement.executeQuery()) {
@@ -91,7 +91,7 @@ public class PayrollDao {
     }
 
     public BigDecimal sumSubmittedAmount() throws SQLException {
-        String sql = "SELECT COALESCE(SUM(total_amount), 0) FROM dbo.payroll_batches WHERE status = 'SUBMITTED'";
+        String sql = "SELECT COALESCE(SUM(total_amount), 0) FROM payroll_batches WHERE status = 'SUBMITTED'";
         try (Connection connection = Database.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql);
              ResultSet rs = statement.executeQuery()) {
@@ -102,9 +102,9 @@ public class PayrollDao {
 
     public void finalApprove(long batchId, long approvedBy) throws SQLException {
         String sql = """
-                UPDATE dbo.payroll_batches
-                SET status = 'APPROVED_FINAL', locked = 1, approved_by = ?, approved_at = SYSDATETIME(),
-                    rejection_reason = NULL, updated_at = SYSDATETIME()
+                UPDATE payroll_batches
+                SET status = 'APPROVED_FINAL', locked = 1, approved_by = ?, approved_at = CURRENT_TIMESTAMP,
+                    rejection_reason = NULL, updated_at = CURRENT_TIMESTAMP
                 WHERE batch_id = ? AND status = 'SUBMITTED' AND locked = 0
                 """;
         try (Connection connection = Database.getConnection();
@@ -120,9 +120,9 @@ public class PayrollDao {
 
     public void reject(long batchId, long approvedBy, String reason) throws SQLException {
         String sql = """
-                UPDATE dbo.payroll_batches
-                SET status = 'REJECTED', approved_by = ?, approved_at = SYSDATETIME(),
-                    rejection_reason = ?, updated_at = SYSDATETIME()
+                UPDATE payroll_batches
+                SET status = 'REJECTED', approved_by = ?, approved_at = CURRENT_TIMESTAMP,
+                    rejection_reason = ?, updated_at = CURRENT_TIMESTAMP
                 WHERE batch_id = ? AND status = 'SUBMITTED' AND locked = 0
                 """;
         try (Connection connection = Database.getConnection();
@@ -137,7 +137,7 @@ public class PayrollDao {
     }
 
     private void publishPayslips(long batchId) throws SQLException {
-        String sql = "UPDATE dbo.payslips SET published = 1 WHERE batch_id = ?";
+        String sql = "UPDATE payslips SET published = 1 WHERE batch_id = ?";
         try (Connection connection = Database.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setLong(1, batchId);
@@ -147,8 +147,8 @@ public class PayrollDao {
 
     public List<Long> findEmployeeUserIds(long batchId) throws SQLException {
         String sql = """
-                SELECT e.user_id FROM dbo.payslips p
-                JOIN dbo.employees e ON e.employee_id = p.employee_id
+                SELECT e.user_id FROM payslips p
+                JOIN employees e ON e.employee_id = p.employee_id
                 WHERE p.batch_id = ?
                 """;
         List<Long> ids = new ArrayList<>();
