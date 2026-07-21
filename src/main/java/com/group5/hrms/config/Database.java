@@ -32,8 +32,8 @@ public final class Database {
         }
         return DriverManager.getConnection(
                 url,
-                env("HRMS_DB_USER", "hrms_app"),
-                env("HRMS_DB_PASSWORD", "HrmsApp@123"));
+                env("HRMS_DB_USER", "sa"),
+                env("HRMS_DB_PASSWORD", "sa"));
     }
 
     private static String env(String name, String fallback) {
